@@ -8,7 +8,7 @@ urlpatterns = [
         name="baby-notification-list-create-view",
     ),
     path(
-        "baby-notifications/<int:pk>/",
+        "baby-notifications/<uuid:pk>/",
         views.BabyNotificationRetrieveUpdateDestroyView.as_view(),
         name="baby-notification-retrieve-update-destroy-view",
     ),
