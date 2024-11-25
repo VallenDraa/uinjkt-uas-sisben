@@ -20,5 +20,5 @@ from django.urls import include, path
 urlpatterns = [
     path("api/", include("baby_notification.urls")),
     path("api/", include("monitor_hardware.urls")),
-    # path("api/", include("baby_schedule.urls")),
+    path("api/", include("baby_schedule.urls")),
 ]

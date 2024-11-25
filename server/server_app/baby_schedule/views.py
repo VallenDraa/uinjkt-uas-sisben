@@ -1,3 +1,14 @@
-from django.shortcuts import render
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 
-# Create your views here.
+from .serializers import BabyScheduleSerializer
+from .models import BabySchedule
+
+
+class BabyScheduleListCreateView(ListCreateAPIView):
+    queryset = BabySchedule.objects.all()
+    serializer_class = BabyScheduleSerializer
+
+
+class BabyScheduleRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
+    queryset = BabySchedule.objects.all()
+    serializer_class = BabyScheduleSerializer

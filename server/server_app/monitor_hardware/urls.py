@@ -3,12 +3,12 @@ from . import views
 
 urlpatterns = [
     path(
-        "monitor-hardware/",
+        "monitor-hardwares/",
         views.MonitorHardwareListCreateView.as_view(),
         name="monitor-hardware-list-create-view",
     ),
     path(
-        "monitor-hardware/<uuid:pk>/",
+        "monitor-hardwares/<uuid:pk>/",
         views.MonitorHardwareRetrieveUpdateDestroyView.as_view(),
         name="monitor-hardware-retrieve-update-destroy-view",
     ),
