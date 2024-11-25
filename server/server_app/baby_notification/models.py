@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 
 
@@ -5,6 +6,8 @@ class BabyNotification(models.Model):
     class NotificationTitle(models.TextChoices):
         CRYING = "crying", "Crying"
         DISCOMFORT = "discomfort", "Discomfort"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
 
     hardware_id = models.ForeignKey(
         "monitor_hardware.MonitorHardware", on_delete=models.CASCADE

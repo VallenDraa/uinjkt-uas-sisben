@@ -1,7 +1,9 @@
+import uuid
 from django.db import models
 
 
 class BabySchedule(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     hardware_id = models.ForeignKey(
         "monitor_hardware.MonitorHardware", on_delete=models.CASCADE
     )
