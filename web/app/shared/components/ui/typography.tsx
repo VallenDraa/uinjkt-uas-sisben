@@ -6,17 +6,17 @@ import { cn } from "~/shared/utils/shadcn";
 export const typographyVariants = cva("", {
   variants: {
     variant: {
-      h1: "text-4xl font-extrabold tracking-tight lg:text-5xl",
-      h2: "text-2xl font-semibold tracking-tight lg:text-3xl",
-      h3: "text-xl font-semibold tracking-tight lg:text-2xl",
-      h4: "text-lg font-semibold tracking-tight lg:text-xl",
+      h1: "text-4xl font-medium tracking-tight lg:text-5xl",
+      h2: "text-2xl font-medium tracking-tight lg:text-3xl",
+      h3: "text-xl font-medium tracking-tight lg:text-2xl",
+      h4: "text-lg font-medium tracking-tight lg:text-xl",
       lead: "text-lg text-muted-foreground lg:text-xl",
-      large: "text-md font-semibold lg:text-lg",
+      large: "text-md font-medium lg:text-lg",
       small: "text-sm font-medium leading-none",
       muted: "text-sm text-muted-foreground",
       p: "leading-7",
       blockquote: "mt-6 border-l-2 pl-6 italic",
-      code: "rounded-md bg-muted px-[0.4rem] py-[0.2rem] font-mono text-sm font-semibold",
+      code: "rounded-md bg-muted px-[0.4rem] py-[0.2rem] font-mono text-sm font-medium",
       label: "text-sm font-medium leading-none cursor-pointer h-6",
       error: "text-sm font-medium text-destructive",
     },
