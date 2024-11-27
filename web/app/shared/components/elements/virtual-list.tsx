@@ -11,6 +11,7 @@ import {
   UseIntersectionObserverOptions,
 } from "~/shared/hooks/use-intersection-observer";
 import { ScrollArea } from "../ui/scroll-area";
+import { Loader2Icon } from "lucide-react";
 
 export type VirtualListProps<TItem> = Omit<
   React.HTMLAttributes<HTMLUListElement>,
@@ -54,7 +55,7 @@ export const VirtualList = <TItem,>({
     estimateSize:
       virtualOptions?.estimateSize ??
       (() => virtualOptions?.defaultItemSize ?? 100),
-    count: items.length,
+    count: virtualOptions?.count ?? items.length,
     getScrollElement: () => parentRef.current,
   });
 
@@ -85,18 +86,10 @@ export const VirtualList = <TItem,>({
               <VirtualListItem
                 ref={intersectorRef}
                 key={virtualItem.key}
-                className={cn(
-                  "absolute inset-x-1",
-                  classNames?.itemSkeletonWrapper,
-                )}
+                className={cn(classNames?.itemSkeletonWrapper)}
                 virtualOptions={virtualItem}
               >
-                <Skeleton
-                  className={cn(
-                    "w-full h-full rounded-md",
-                    classNames?.itemSkeleton,
-                  )}
-                />
+                <Skeleton className="h-full w-full" />
               </VirtualListItem>
             ) : (
               <VirtualListItem

@@ -12,7 +12,7 @@ import { BabyNotificationsListItem } from "~/features/baby-notification/componen
 import {
   prefetchGetBabyNotifications,
   useGetBabyNotifications,
-} from "~/features/baby-notification/queries/use-get-baby-notifications-query";
+} from "~/features/baby-notification/queries/get-baby-notifications-query";
 import { queryConfig } from "~/lib/react-query";
 import { DataFilters } from "~/shared/components/elements/data-filters";
 
@@ -44,11 +44,31 @@ export default function BabyNotificationsPageWrapper() {
 }
 
 const BabyNotificationsPage = () => {
-  const { data } = useGetBabyNotifications();
   const { filters, setFilters } = useDataFilters({
     useQueryParams: true,
     defaultValues: DEFAULT_DATA_FILTERS,
   });
+
+  const babyNotificationsQuery = useGetBabyNotifications({
+    filterParameters: filters,
+  });
+  const flatItems = React.useMemo(
+    () => ({
+      count: babyNotificationsQuery.data?.pages.at(-1)?.count ?? 0,
+      items:
+        babyNotificationsQuery.data?.pages.flatMap(item => item.results) ?? [],
+    }),
+    [babyNotificationsQuery.data],
+  );
+
+  const handleFetchNextPage = React.useCallback(
+    (isIntersecting: boolean) => {
+      if (isIntersecting && babyNotificationsQuery.hasNextPage) {
+        babyNotificationsQuery.fetchNextPage();
+      }
+    },
+    [babyNotificationsQuery.hasNextPage, babyNotificationsQuery.fetchNextPage],
+  );
 
   const isClient = useIsClient();
   const isSmallScreen = useMediaQuery("(max-width: 640px)");
@@ -67,10 +87,13 @@ const BabyNotificationsPage = () => {
 
       {isClient && (
         <VirtualList
-          items={data?.results || []}
+          items={flatItems.items || []}
           classNames={{ wrapper: "grow", item: "flex" }}
+          intersectionObserverOptions={{ onChange: handleFetchNextPage }}
           virtualOptions={{
-            count: data?.results.length,
+            count: babyNotificationsQuery.hasNextPage
+              ? flatItems.count + 1
+              : flatItems.count,
             defaultItemSize: isSmallScreen ? 276 : 240,
           }}
         >

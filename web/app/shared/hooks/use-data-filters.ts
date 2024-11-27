@@ -7,7 +7,9 @@ export type UseDataFiltersReturn<TValue extends Record<string, string>> = {
   setFilters: (filters: TValue) => void;
 };
 
-export type useDataFiltersOptions<TValue extends Record<string, string>> = {
+export type useDataFiltersOptions<
+  TValue extends Record<string, string | number>,
+> = {
   useQueryParams?: boolean;
   defaultValues: TValue;
 };

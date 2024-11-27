@@ -6,6 +6,7 @@ export type PaginatedApiResponse<TResults> = {
 };
 
 export type FilterParameters = {
+  page?: string;
   search?: string;
   ordering?: "created_at" | "-created_at";
   created_at__range?: `${string},${string}`;
