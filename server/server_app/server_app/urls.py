@@ -16,9 +16,11 @@ Including another URLconf
 """
 
 from django.urls import include, path
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path("api/", include("baby_notification.urls")),
     path("api/", include("monitor_hardware.urls")),
     path("api/", include("baby_schedule.urls")),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

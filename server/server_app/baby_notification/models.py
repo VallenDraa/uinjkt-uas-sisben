@@ -16,7 +16,7 @@ class BabyNotificationModel(models.Model):
         max_length=255,
         choices=NotificationTitle.choices,
     )
-    picture = models.ImageField(upload_to="media/baby_pictures/")
+    picture = models.ImageField(upload_to="baby_pictures/")
     clarification = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
