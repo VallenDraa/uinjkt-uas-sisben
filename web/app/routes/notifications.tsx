@@ -1,5 +1,12 @@
-import { Button } from "~/shared/components/ui/button";
+import { PageLayout } from "~/shared/components/layouts/page-layout";
 
 export default function NotificationsPage() {
-  return <Button>notification</Button>;
+  return (
+    <PageLayout
+      title="Notifikasi Bayi"
+      backLink={{ name: "Kembali", href: "/" }}
+    >
+      Notifikasi
+    </PageLayout>
+  );
 }
