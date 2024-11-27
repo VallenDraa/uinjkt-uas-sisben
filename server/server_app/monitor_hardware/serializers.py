@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from .models import MonitorHardware
+from .models import MonitorHardwareModel
 
 
 class MonitorHardwareSerializer(serializers.ModelSerializer):
     class Meta:
-        model = MonitorHardware
+        model = MonitorHardwareModel
         fields = "__all__"

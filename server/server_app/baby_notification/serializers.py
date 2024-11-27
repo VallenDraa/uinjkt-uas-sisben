@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from .models import BabyNotification
+from .models import BabyNotificationModel
 
 
 class BabyNotificationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = BabyNotification
+        model = BabyNotificationModel
         fields = "__all__"

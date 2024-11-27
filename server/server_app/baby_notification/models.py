@@ -2,7 +2,7 @@ import uuid
 from django.db import models
 
 
-class BabyNotification(models.Model):
+class BabyNotificationModel(models.Model):
     class NotificationTitle(models.TextChoices):
         CRYING = "crying", "Crying"
         DISCOMFORT = "discomfort", "Discomfort"
@@ -10,13 +10,13 @@ class BabyNotification(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
 
     hardware_id = models.ForeignKey(
-        "monitor_hardware.MonitorHardware", on_delete=models.CASCADE
+        "monitor_hardware.MonitorHardwareModel", on_delete=models.CASCADE
     )
     title = models.CharField(
         max_length=255,
         choices=NotificationTitle.choices,
     )
-    picture = models.ImageField(upload_to="baby_pictures/")
+    picture = models.ImageField(upload_to="media/baby_pictures/")
     clarification = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
