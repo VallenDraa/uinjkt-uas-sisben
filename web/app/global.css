@@ -61,7 +61,7 @@
 
 @layer base {
   * {
-    @apply border-border focus-visible:ring-ring focus-visible:ring-1 ring-offset-2 focus-visible:outline-none;
+    @apply border-border focus-visible:ring-ring focus-visible:ring-2 ring-offset-2 ring-offset-background focus-visible:outline-none;
   }
 
   body {

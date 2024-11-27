@@ -8,9 +8,9 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "~/shared/components/ui/card";
+} from "~/shared/components/elements/card";
 import { Typography } from "~/shared/components/ui/typography";
-import { BABY_MENU_ITEMS } from "~/shared/constants/menu";
+import { BABY_MENU_ITEMS } from "~/shared/constants/menu.contants";
 
 export const meta: MetaFunction = () => {
   return [
@@ -22,7 +22,7 @@ export const meta: MetaFunction = () => {
 export default function Index() {
   return (
     <PageLayout
-      classNames={{ main: "grid md:grid-cols-2 gap-6" }}
+      classNames={{ main: "grid md:grid-cols-2 gap-6 grow-0 overflow-visible" }}
       title="Selamat Datang 👋"
       description={
         <>

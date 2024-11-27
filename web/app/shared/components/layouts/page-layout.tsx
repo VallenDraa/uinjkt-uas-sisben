@@ -5,6 +5,7 @@ import { Typography } from "../ui/typography";
 import { Link } from "@remix-run/react";
 import { buttonVariants } from "../ui/button";
 import { MoveLeftIcon } from "lucide-react";
+import { Separator } from "../ui/separator";
 
 export type PageLayoutProps = Omit<
   React.HTMLAttributes<HTMLDivElement>,
@@ -35,20 +36,20 @@ export const PageLayout = ({
     <div
       {...props}
       className={cn(
-        "relative max-w-[960px] mx-auto px-4 min-h-screen flex flex-col gap-8",
+        "relative max-w-[960px] mx-auto h-screen flex flex-col",
         classNames?.header,
       )}
     >
       <div
         role="presentation"
         className={cn(
-          "h-40 inset-x-0 bg-gradient-to-b from-green-600/20 via-green-300/20  dark:from-green-300/20 dark:via-green-800/20 to-transparent fixed top-0",
+          "h-40 inset-x-0 bg-gradient-to-b from-green-600/30 via-green-300/30  dark:from-green-300/20 dark:via-green-800/20 to-transparent fixed top-0",
           classNames?.gradient,
         )}
       />
 
       <header
-        className={cn("pt-16 space-y-6 relative z-10", classNames?.header)}
+        className={cn("pt-10 space-y-6 relative z-10 px-4", classNames?.header)}
       >
         {backLink && (
           <Link
@@ -79,10 +80,13 @@ export const PageLayout = ({
         </div>
       </header>
 
-      <main className={cn(classNames?.main)}>{children}</main>
+      <main className={cn("grow overflow-hidden py-6 px-4", classNames?.main)}>
+        {children}
+      </main>
 
-      <footer className={cn("pb-6 mt-auto", classNames?.footer)}>
-        <Typography tag="p" variant="muted">
+      <footer className={cn("pb-6 space-y-6 mt-auto px-4", classNames?.footer)}>
+        <Separator />
+        <Typography tag="p" variant="muted" className="text-center">
           &copy; {new Date().getFullYear()} Seebaby - Made with ❤️ for 👶
         </Typography>
       </footer>
