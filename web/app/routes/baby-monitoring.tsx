@@ -22,7 +22,8 @@ const BabyMonitoringPage = () => {
 
   return (
     <PageLayout
-      title="Monitoring"
+      title="Monitoring Bayi"
+      description="Monitor untuk bayi, suhu, dan kelembapan ruangan."
       classNames={{ main: "overflow-auto" }}
       backLink={{ name: "Kembali", href: "/" }}
     >
@@ -35,12 +36,12 @@ const BabyMonitoringPage = () => {
           className="w-full rounded-lg shadow"
         />
 
-        <aside className="basis-full md:basis-56 border border-border bg-card shadow rounded-lg flex flex-row md:flex-col justify-between">
+        <aside className="basis-full md:basis-56 border border-border bg-card shadow rounded-lg flex flex-col sm:flex-row md:flex-col justify-between">
           <NumberStatsWithIcon
             classNames={{ wrapper: "grow" }}
             icon={ThermometerSunIcon}
             title="Suhu Celcius"
-            value={`${lastJsonMessage?.tempCelcius || "-"}°C`}
+            value={`${lastJsonMessage?.tempCelcius ?? "-"}°C`}
           />
 
           <Separator orientation={isSmallScreen ? "vertical" : "horizontal"} />
@@ -49,7 +50,7 @@ const BabyMonitoringPage = () => {
             classNames={{ wrapper: "grow" }}
             icon={ThermometerSunIcon}
             title="Suhu Farenheit"
-            value={`${lastJsonMessage?.tempFarenheit || "-"}F`}
+            value={`${lastJsonMessage?.tempFarenheit ?? "-"}F`}
           />
 
           <Separator orientation={isSmallScreen ? "vertical" : "horizontal"} />
@@ -58,7 +59,7 @@ const BabyMonitoringPage = () => {
             classNames={{ wrapper: "grow" }}
             icon={DropletsIcon}
             title="Kelembapan"
-            value={`${lastJsonMessage?.humidity || "-"}%`}
+            value={`${lastJsonMessage?.humidity ?? "-"}%`}
           />
         </aside>
       </div>
