@@ -1,16 +1,17 @@
 import ReactPlayer from "react-player/file";
 import { PageLayout } from "~/shared/components/layouts/page-layout";
-import { BABY_MONITORING_VIDEO_STREAM_URL } from "~/features/baby-monitoring/constants/baby-monitoring.constants";
+import { useIsClient } from "~/shared/hooks/use-is-client";
 
-export default function BabyMonitoringPage() {
+export default function BabyMonitoringPageWrapper() {
+  const isClient = useIsClient();
+
+  return isClient ? <BabyMonitoringPage /> : null;
+}
+
+const BabyMonitoringPage = () => {
   return (
     <PageLayout title="Monitoring" backLink={{ name: "Kembali", href: "/" }}>
-      <ReactPlayer
-        playing
-        muted
-        controls
-        url={BABY_MONITORING_VIDEO_STREAM_URL}
-      />
+      <ReactPlayer playing muted controls />
     </PageLayout>
   );
-}
+};

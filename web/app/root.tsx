@@ -12,6 +12,7 @@ import stylesheet from "~/global.css?url";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "./shared/components/elements/sonner";
 import { queryConfig } from "./lib/react-query";
+import { envLoader } from "./config/env";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -48,7 +49,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 // Expose some environment variables to the client
 export async function loader() {
   return {
-    env: { API_URL: process.env.API_URL },
+    ...envLoader(),
   };
 }
 

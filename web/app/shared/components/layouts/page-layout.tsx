@@ -87,7 +87,8 @@ export const PageLayout = ({
       <footer className={cn("pb-6 space-y-6 mt-auto px-4", classNames?.footer)}>
         <Separator />
         <Typography tag="p" variant="muted" className="text-center">
-          &copy; {new Date().getFullYear()} Seebaby - Made with ❤️ for 👶
+          &copy; {new Date().getFullYear()} Seebaby - Dibuat dengan ❤️ untuk 👶
+          dan sisben.
         </Typography>
       </footer>
     </div>

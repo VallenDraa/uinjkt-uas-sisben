@@ -30,6 +30,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -42,8 +43,10 @@ INSTALLED_APPS = [
     # our apps
     "baby_notification",
     "baby_schedule",
+    "baby_monitoring",
     "monitor_hardware",
 ]
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -80,7 +83,12 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "server_app.wsgi.application"
-
+ASGI_APPLICATION = "server_app.asgi.application"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
