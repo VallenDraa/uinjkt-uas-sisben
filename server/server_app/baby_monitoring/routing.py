@@ -1,15 +1,15 @@
 from django.urls import re_path
-from .consumers import BabyStreamingTempsHumidityConsumer, BabyStreamingVideoConsumer
+from .consumers import BabyMonitoringTempsHumidityConsumer, BabyMonitoringVideoConsumer
 
 websocket_urlpatterns = [
     re_path(
-        "ws/baby-monitoring/video",
-        BabyStreamingVideoConsumer.as_asgi(),
+        r"ws/baby-monitoring/video/(?P<hardware_code>\w+)/$",
+        BabyMonitoringVideoConsumer.as_asgi(),
         name="baby-monitoring-video",
     ),
     re_path(
-        "ws/baby-monitoring/temps-humidity",
-        BabyStreamingTempsHumidityConsumer.as_asgi(),
-        name="baby-monitoring-video",
+        r"^ws/baby-monitoring/temps-humidity/(?P<hardware_code>[\w\-]+)/$",
+        BabyMonitoringTempsHumidityConsumer.as_asgi(),
+        name="baby-monitoring-temps-humidity",
     ),
 ]
