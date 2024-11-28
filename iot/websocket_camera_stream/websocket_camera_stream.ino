@@ -149,7 +149,6 @@ void setup()
 
   // init_camera();
   init_wifi();
-  sendTempsAndHumidity();
 }
 
 void loop()
