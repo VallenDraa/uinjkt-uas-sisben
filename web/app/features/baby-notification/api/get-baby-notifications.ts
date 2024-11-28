@@ -7,7 +7,7 @@ import { BabyNotification } from "../types/baby-notification.types";
 
 export const getBabyNotifications = async (params?: FilterParameters) => {
   const { data } = await api.get<PaginatedApiResponse<BabyNotification[]>>(
-    `/baby-notifications`,
+    `/baby-notifications/`,
     { params },
   );
 

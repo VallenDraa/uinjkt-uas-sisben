@@ -22,7 +22,7 @@
     "@remix-run/node": "^2.14.0",
     "@remix-run/react": "^2.14.0",
     "@remix-run/serve": "^2.14.0",
-    "@tanstack/react-query": "^5.61.4",
+    "@tanstack/react-query": "^5.61.5",
     "@tanstack/react-virtual": "^3.10.9",
     "axios": "^1.7.8",
     "class-variance-authority": "^0.7.1",
@@ -40,12 +40,14 @@
     "sonner": "^1.7.0",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
+    "use-debounce": "^10.0.4",
     "use-dehydrated-state": "^0.1.0",
     "vaul": "^1.1.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@remix-run/dev": "^2.14.0",
+    "@tanstack/react-query-devtools": "^5.61.5",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.7.4",

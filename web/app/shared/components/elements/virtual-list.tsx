@@ -11,7 +11,6 @@ import {
   UseIntersectionObserverOptions,
 } from "~/shared/hooks/use-intersection-observer";
 import { ScrollArea } from "../ui/scroll-area";
-import { Loader2Icon } from "lucide-react";
 
 export type VirtualListProps<TItem> = Omit<
   React.HTMLAttributes<HTMLUListElement>,
@@ -130,3 +129,4 @@ export const VirtualListItem = React.forwardRef<
     </li>
   );
 });
+VirtualListItem.displayName = "VirtualListItem";

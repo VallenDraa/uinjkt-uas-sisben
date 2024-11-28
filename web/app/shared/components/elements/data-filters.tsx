@@ -3,14 +3,13 @@ import { Input } from "~/shared/components/ui/input";
 import { FilterParameters } from "~/shared/models/api.types";
 import { cn } from "~/shared/utils/shadcn";
 import { DateRangePicker } from "./date-range-picker";
-import { formatDate, formatDateYYYYMMDD } from "~/shared/utils/formatter";
+import { formatDateYYYYMMDD } from "~/shared/utils/formatter";
+import { useDebouncedCallback } from "use-debounce";
 
 export type DataFiltersProps = {
   filters: FilterParameters;
   setFilters: (filters: FilterParameters) => void;
-  classNames?: {
-    wrapper?: string;
-  };
+  classNames?: { wrapper?: string };
 };
 
 export const DataFilters = ({
@@ -19,6 +18,16 @@ export const DataFilters = ({
   classNames,
 }: DataFiltersProps) => {
   const currentDate = React.useRef(new Date());
+
+  const [innerSearch, setInnerSearch] = React.useState(filters.search ?? "");
+
+  const debouncedSearch = useDebouncedCallback(
+    React.useCallback(
+      (newSearch: string) => setFilters({ ...filters, search: newSearch }),
+      [filters, setFilters],
+    ),
+    800,
+  );
 
   return (
     <div
@@ -31,8 +40,13 @@ export const DataFilters = ({
         <Input
           type="text"
           placeholder="Cari Notifikasi..."
-          value={filters.search}
-          onChange={e => setFilters({ ...filters, search: e.target.value })}
+          value={innerSearch}
+          onChange={e => {
+            const newSearch = e.target.value;
+
+            setInnerSearch(newSearch);
+            debouncedSearch(newSearch);
+          }}
         />
         <DateRangePicker
           onUpdate={values => {

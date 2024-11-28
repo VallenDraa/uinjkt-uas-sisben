@@ -9,7 +9,7 @@ export default function SingleBabyNotificationPage() {
   return (
     <PageLayout
       title="Notifikasi Bayi 123"
-      backLink={{ name: "Kembali", href: "/" }}
+      backLink={{ name: "Kembali", href: "/baby-notifications" }}
     >
       Notifikasi 12323
     </PageLayout>

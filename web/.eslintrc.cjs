@@ -1,3 +1,5 @@
+const path = require("node:path");
+
 /**
  * This is intended to be a basic starting point for linting in your app.
  * It relies on recommended configs out of the box for simplicity, but you can
