@@ -50,7 +50,7 @@ const BabyMonitoringPage = () => {
             classNames={{ wrapper: "grow" }}
             icon={ThermometerSunIcon}
             title="Suhu Farenheit"
-            value={`${lastJsonMessage?.tempFarenheit ?? "-"}F`}
+            value={`${lastJsonMessage?.tempFarenheit ?? "-"}°F`}
           />
 
           <Separator orientation={isSmallScreen ? "vertical" : "horizontal"} />
