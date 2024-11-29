@@ -76,6 +76,7 @@ module.exports = {
       ],
       rules: {
         "import/namespace": "off",
+        "react/prop-types": "off",
       },
     },
 

@@ -54,7 +54,7 @@ export const DateInput = ({ value, onChange }: DateInputProps) => {
         d.getDate() === newDate.day
       );
     },
-    [],
+    [date],
   );
 
   const handleInputChange = React.useCallback(
@@ -72,7 +72,7 @@ export const DateInput = ({ value, onChange }: DateInputProps) => {
         onChange(new Date(newDate.year, newDate.month - 1, newDate.day));
       }
     },
-    [],
+    [date, onChange, validateDate],
   );
 
   const initialDate = React.useRef<DateParts>(date);
@@ -95,7 +95,7 @@ export const DateInput = ({ value, onChange }: DateInputProps) => {
           initialDate.current = { ...date, [field]: newValue };
         }
       },
-    [],
+    [date, validateDate],
   );
 
   const handleKeyDown = React.useCallback(
@@ -205,29 +205,11 @@ export const DateInput = ({ value, onChange }: DateInputProps) => {
         }
       }
     },
-    [],
+    [date, onChange],
   );
 
   return (
     <div className="flex border rounded-lg items-center text-sm px-1 bg-input">
-      <Input
-        type="text"
-        ref={monthRef}
-        max={12}
-        maxLength={2}
-        value={date.month.toString()}
-        onChange={handleInputChange("month")}
-        onKeyDown={handleKeyDown("month")}
-        onFocus={e => {
-          if (window.innerWidth > 1024) {
-            e.target.select();
-          }
-        }}
-        onBlur={handleBlur("month")}
-        className="bg-transparent p-0 outline-none w-6 border-none text-center"
-        placeholder="M"
-      />
-      <span className="opacity-20 -mx-px">/</span>
       <Input
         type="text"
         ref={dayRef}
@@ -244,6 +226,24 @@ export const DateInput = ({ value, onChange }: DateInputProps) => {
         onBlur={handleBlur("day")}
         className="bg-transparent p-0 outline-none w-7 border-none text-center"
         placeholder="D"
+      />
+      <span className="opacity-20 -mx-px">/</span>
+      <Input
+        type="text"
+        ref={monthRef}
+        max={12}
+        maxLength={2}
+        value={date.month.toString()}
+        onChange={handleInputChange("month")}
+        onKeyDown={handleKeyDown("month")}
+        onFocus={e => {
+          if (window.innerWidth > 1024) {
+            e.target.select();
+          }
+        }}
+        onBlur={handleBlur("month")}
+        className="bg-transparent p-0 outline-none w-6 border-none text-center"
+        placeholder="M"
       />
       <span className="opacity-20 -mx-px">/</span>
       <Input

@@ -71,7 +71,7 @@ export const DateRangePicker = ({
         ? getDateAdjustedForTimezone(initialDateFrom)
         : initialDateFrom,
     });
-  }, []);
+  }, [initialDateFrom, initialDateTo]);
 
   return (
     <Drawer
