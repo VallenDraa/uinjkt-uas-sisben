@@ -6,6 +6,7 @@ import {
   Scripts,
   ScrollRestoration,
   useLoaderData,
+  useRouteError,
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
 import stylesheet from "~/global.css?url";
@@ -13,6 +14,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "./shared/components/elements/sonner";
 import { queryConfig } from "./lib/react-query";
 import { envLoader } from "./config/env";
+import { ErrorLayout } from "./shared/components/layouts/error-layout";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -28,9 +30,9 @@ export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
 ];
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <html lang="en">
+    <html lang="id">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -44,14 +46,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </body>
     </html>
   );
-}
+};
 
 // Expose some environment variables to the client
-export async function loader() {
+export const loader = async () => {
   return {
     ...envLoader(),
   };
-}
+};
 
 export default function App() {
   const { env } = useLoaderData<typeof loader>();
@@ -71,3 +73,21 @@ export default function App() {
     </QueryClientProvider>
   );
 }
+
+export const ErrorBoundary = () => {
+  const error = useRouteError();
+
+  return (
+    <html lang="id">
+      <head>
+        <title>Oops!</title>
+        <Meta />
+        <Links />
+      </head>
+      <body>
+        <ErrorLayout error={error} />
+        <Scripts />
+      </body>
+    </html>
+  );
+};

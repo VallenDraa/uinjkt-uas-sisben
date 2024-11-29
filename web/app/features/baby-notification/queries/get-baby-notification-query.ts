@@ -1,4 +1,4 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { QueryClient, queryOptions, useQuery } from "@tanstack/react-query";
 import { getBabyNotification } from "../api/get-baby-notification";
 import { QueryConfig } from "~/lib/react-query";
 
@@ -28,4 +28,16 @@ export const useGetBabyNotification = ({
     ...getBabyNotificationQueryOptions(id),
     ...queryConfig,
   });
+};
+
+export const prefetchGetBabyNotification = async (
+  queryClient: QueryClient,
+  { id, queryConfig }: UseGetBabyNotificationOptions,
+) => {
+  await queryClient.prefetchQuery({
+    ...getBabyNotificationQueryOptions(id),
+    ...queryConfig,
+  });
+
+  return queryClient;
 };

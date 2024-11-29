@@ -13,7 +13,8 @@ export type PageLayoutProps = Omit<
   "className"
 > & {
   backLink?: { name: string; href: string; className?: string };
-  children: React.ReactNode;
+  showDateTime?: boolean;
+  children?: React.ReactNode;
   title: React.ReactNode;
   description?: React.ReactNode;
   classNames?: {
@@ -27,6 +28,7 @@ export type PageLayoutProps = Omit<
 
 export const PageLayout = ({
   children,
+  showDateTime = true,
   title,
   description,
   classNames,
@@ -38,7 +40,7 @@ export const PageLayout = ({
       {...props}
       className={cn(
         "relative max-w-[960px] mx-auto h-screen flex flex-col",
-        classNames?.header,
+        classNames?.wrapper,
       )}
     >
       <div
@@ -66,7 +68,7 @@ export const PageLayout = ({
           </Link>
         )}
 
-        <CurrentDateTime />
+        {showDateTime && <CurrentDateTime />}
 
         <div className="space-y-2">
           <Typography variant="h2" tag="h1">
