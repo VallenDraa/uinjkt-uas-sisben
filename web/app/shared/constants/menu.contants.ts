@@ -1,4 +1,4 @@
-import { BellRingIcon, Calendar1Icon, CctvIcon, HouseIcon } from "lucide-react";
+import { BellRingIcon, Calendar1Icon, CctvIcon } from "lucide-react";
 
 export const BABY_MENU_ITEMS = [
   {

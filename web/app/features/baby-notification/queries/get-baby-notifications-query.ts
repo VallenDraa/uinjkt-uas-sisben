@@ -1,9 +1,7 @@
 import {
   infiniteQueryOptions,
   QueryClient,
-  queryOptions,
   useInfiniteQuery,
-  useQuery,
 } from "@tanstack/react-query";
 import {
   FilterParameters,
