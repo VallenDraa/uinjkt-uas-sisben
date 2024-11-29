@@ -1,4 +1,4 @@
-import { FilterParameters } from "../models/api.types";
+import { FilterParameters } from "../types/api.types";
 
 export const DEFAULT_DATA_FILTERS: FilterParameters = {
   ordering: undefined,

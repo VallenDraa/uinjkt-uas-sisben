@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Input } from "~/shared/components/ui/input";
-import { FilterParameters } from "~/shared/models/api.types";
+import { FilterParameters } from "~/shared/types/api.types";
 import { cn } from "~/shared/utils/shadcn";
 import { DateRangePicker } from "./date-range-picker";
 import { formatDateYYYYMMDD } from "~/shared/utils/formatter";

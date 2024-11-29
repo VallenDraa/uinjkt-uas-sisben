@@ -8,7 +8,7 @@ import {
 import {
   FilterParameters,
   PaginatedApiResponse,
-} from "~/shared/models/api.types";
+} from "~/shared/types/api.types";
 import { getBabyNotifications } from "../api/get-baby-notifications";
 import { QueryConfig } from "~/lib/react-query";
 import { BabyNotification } from "../types/baby-notification.types";

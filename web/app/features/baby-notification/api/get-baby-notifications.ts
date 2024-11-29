@@ -2,7 +2,7 @@ import { api } from "~/lib/axios";
 import {
   PaginatedApiResponse,
   FilterParameters,
-} from "~/shared/models/api.types";
+} from "~/shared/types/api.types";
 import { BabyNotification } from "../types/baby-notification.types";
 
 export const getBabyNotifications = async (params?: FilterParameters) => {
