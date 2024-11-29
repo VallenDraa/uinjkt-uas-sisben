@@ -24,12 +24,19 @@ import { DEFAULT_DATA_FILTERS } from "~/shared/constants/data-filters.constants"
 import { useDataFilters } from "~/shared/hooks/use-data-filters";
 import { useIsClient } from "~/shared/hooks/use-is-client";
 import { useMediaQuery } from "~/shared/hooks/use-media-query";
+import { FilterParameters } from "~/shared/types/api.types";
+import { getSearchParamsFromUrl } from "~/shared/utils/url";
 
-export const loader = async ({ params }: LoaderFunctionArgs) => {
-  console.log("🚀 ~ loader ~ params:", params);
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const filterParameters = getSearchParamsFromUrl<FilterParameters>(
+    new URL(request.url),
+  );
+
   const queryClient = new QueryClient({ defaultOptions: queryConfig });
 
-  const prefetchedQuery = await prefetchGetBabyNotifications(queryClient);
+  const prefetchedQuery = await prefetchGetBabyNotifications(queryClient, {
+    filterParameters,
+  });
 
   return {
     dehydratedState: dehydrate(prefetchedQuery),
