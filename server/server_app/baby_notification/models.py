@@ -17,6 +17,9 @@ class BabyNotificationModel(models.Model):
         choices=NotificationTitle.choices,
     )
     picture = models.ImageField(upload_to="baby_pictures/")
+    temp_celcius = models.FloatField(default=0)
+    temp_farenheit = models.FloatField(default=0)
+    humidity = models.FloatField(default=0)
     clarification = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

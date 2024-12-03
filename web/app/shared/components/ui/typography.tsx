@@ -16,7 +16,7 @@ export const typographyVariants = cva("", {
       muted: "text-sm text-muted-foreground",
       p: "leading-7",
       blockquote: "mt-6 border-l-2 pl-6 italic",
-      code: "rounded-md bg-muted px-[0.4rem] py-[0.2rem] font-mono text-sm font-medium",
+      code: "rounded-lg bg-muted px-[0.4rem] py-[0.2rem] font-mono text-sm font-medium",
       label: "text-sm font-medium leading-none cursor-pointer h-6",
       error: "text-sm font-medium text-destructive",
     },

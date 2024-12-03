@@ -39,7 +39,7 @@ export const PageLayout = ({
     <div
       {...props}
       className={cn(
-        "relative max-w-[960px] mx-auto h-screen flex flex-col",
+        "relative max-w-[960px] mx-auto min-h-screen flex flex-col",
         classNames?.wrapper,
       )}
     >
@@ -84,9 +84,7 @@ export const PageLayout = ({
       </header>
 
       <ScrollArea>
-        <main
-          className={cn("grow overflow-hidden py-6 px-4", classNames?.main)}
-        >
+        <main className={cn("grow py-6 px-4", classNames?.main)}>
           {children}
         </main>
       </ScrollArea>

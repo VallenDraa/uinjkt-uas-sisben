@@ -111,7 +111,10 @@ const BabyNotificationsPage = () => {
           {flatItems.items.length > 0 && !babyNotificationsQuery.isLoading && (
             <VirtualList
               items={flatItems.items || []}
-              classNames={{ wrapper: "grow", item: "flex" }}
+              classNames={{
+                wrapper: "grow animate-in fade-in",
+                item: "flex",
+              }}
               intersectionObserverOptions={{ onChange: handleFetchNextPage }}
               virtualOptions={{
                 count: babyNotificationsQuery.hasNextPage

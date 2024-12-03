@@ -33,7 +33,7 @@ const BabyMonitoringPage = () => {
           muted
           controls
           src="/stock.mp4"
-          className="w-full rounded-lg shadow"
+          className="rounded-lg w-full shadow border border-border aspect-video"
         />
 
         <aside className="basis-full md:basis-56 border border-border bg-card shadow rounded-lg flex flex-col sm:flex-row md:flex-col justify-between">
