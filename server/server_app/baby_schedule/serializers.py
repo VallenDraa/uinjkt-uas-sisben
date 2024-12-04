@@ -3,6 +3,7 @@ from .models import BabyScheduleModel
 
 
 class BabyScheduleSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = BabyScheduleModel
         fields = "__all__"
@@ -13,3 +14,8 @@ class BabyScheduleSerializer(serializers.ModelSerializer):
             "description": {"required": False},
             "time": {"required": False},
         }
+
+
+class OrganizedSchedulesSerializer(serializers.Serializer):
+    part_of_day = serializers.CharField()
+    schedules = BabyScheduleSerializer(many=True)

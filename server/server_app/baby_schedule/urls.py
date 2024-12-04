@@ -1,15 +1,18 @@
+from rest_framework.routers import SimpleRouter
 from django.urls import path
-from . import views
+from .views import BabyScheduleViewSet
+
+router = SimpleRouter()
 
 urlpatterns = [
     path(
-        "baby-schedules/",
-        views.BabyScheduleListCreateView.as_view(),
-        name="baby-schedule-list-create-view",
+        "baby-schedules/<uuid:hardware_id>/",
+        BabyScheduleViewSet.as_view({"get": "list", "post": "generate"}),
+        name="baby-schedules-list",
     ),
     path(
-        "baby-schedules/<uuid:pk>/",
-        views.BabyScheduleRetrieveUpdateDestroyView.as_view(),
-        name="baby-schedule-retrieve-update-destroy-view",
+        "baby-schedules/<uuid:hardware_id>/<uuid:pk>/",
+        BabyScheduleViewSet.as_view({"get": "retrieve", "delete": "destroy"}),
+        name="baby-schedules-detail",
     ),
 ]

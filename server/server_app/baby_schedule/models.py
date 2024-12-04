@@ -1,3 +1,4 @@
+import json
 import uuid
 from django.db import models
 
@@ -14,4 +15,13 @@ class BabyScheduleModel(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return str(self.hardware_id)
+        return str(
+            {
+                "hardware_id": self.hardware_id,
+                "title": self.title,
+                "description": self.description,
+                "time": self.time,
+                "created_at": self.created_at,
+                "updated_at": self.updated_at,
+            }
+        )
