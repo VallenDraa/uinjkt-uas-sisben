@@ -15,7 +15,7 @@ import {
 import {
   getBabyNotificationQueryOptions,
   prefetchGetBabyNotification,
-} from "~/features/baby-notification/queries/get-baby-notification-query";
+} from "~/features/baby-notification/queries/get-baby-notification.query";
 import { queryConfig } from "~/lib/react-query";
 import { NumberStatsWithIcon } from "~/features/baby-monitoring/components/elements/number-stats-with-icon";
 import { PageLayout } from "~/shared/components/layouts/page-layout";
@@ -86,7 +86,7 @@ const SingleBabyNotificationPage = () => {
 
   const { id } = useParams<{ id: string }>();
   const { babyNotificationsQuery, handleUpdateBabyNotification } =
-    useBabyNotification(id);
+    useBabyNotification({ id, enableQuery: true });
 
   const form = useForm<BabyNotification>({
     resolver: zodResolver(babyNotificationsValidator),

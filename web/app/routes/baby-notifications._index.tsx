@@ -13,7 +13,7 @@ import { BabyNotificationsListItem } from "~/features/baby-notification/componen
 import {
   prefetchGetBabyNotifications,
   useGetBabyNotifications,
-} from "~/features/baby-notification/queries/get-baby-notifications-query";
+} from "~/features/baby-notification/queries/get-baby-notifications.query";
 import { queryConfig } from "~/lib/react-query";
 import { DataFilters } from "~/shared/components/elements/data-filters";
 

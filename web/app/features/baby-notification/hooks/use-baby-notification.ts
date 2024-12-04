@@ -1,12 +1,20 @@
 import { toast } from "sonner";
-import { useGetBabyNotification } from "../queries/get-baby-notification-query";
-import { useUpdateBabyNotification } from "../queries/update-baby-notification-query";
+import { useGetBabyNotification } from "../queries/get-baby-notification.query";
+import { useUpdateBabyNotification } from "../queries/update-baby-notification.query";
 import { BabyNotification } from "../types/baby-notification.types";
 
-export const useBabyNotification = (id?: string) => {
+export type UseBabyNotificationOptions = {
+  id?: string;
+  enableQuery: boolean;
+};
+
+export const useBabyNotification = ({
+  id,
+  enableQuery,
+}: UseBabyNotificationOptions) => {
   const babyNotificationsQuery = useGetBabyNotification({
     id: id!,
-    queryConfig: { enabled: id !== undefined },
+    queryConfig: { enabled: enableQuery },
   });
 
   const { mutateAsync } = useUpdateBabyNotification();
