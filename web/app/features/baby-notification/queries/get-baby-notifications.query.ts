@@ -7,7 +7,7 @@ import {
   FilterParameters,
   PaginatedApiResponse,
 } from "~/shared/types/api.types";
-import { getBabyNotifications } from "../api/get-baby-notifications";
+import { getBabyNotifications } from "../api/get-baby-notifications.api";
 import { QueryConfig } from "~/lib/react-query";
 import { BabyNotification } from "../types/baby-notification.types";
 

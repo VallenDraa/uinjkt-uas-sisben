@@ -11,7 +11,7 @@
 #include "env.h"
 
 // DHT22 Configuration
-#define DHT_PIN 14
+#define DHT_PIN 13
 #define DHT_TYPE DHT22
 DHT dht(DHT_PIN, DHT_TYPE);
 

@@ -38,8 +38,11 @@ import {
 import { babyNotificationsValidator } from "~/features/baby-notification/validators/baby-notifications.validator";
 import { Button } from "~/shared/components/ui/button";
 import { useBabyNotification } from "~/features/baby-notification/hooks/use-baby-notification";
+import { requirehardwareCodeMiddleware } from "~/middlewares/require-hardware-code.middleware";
 
-export const loader = async ({ params }: LoaderFunctionArgs) => {
+export const loader = async ({ params, request }: LoaderFunctionArgs) => {
+  await requirehardwareCodeMiddleware(request);
+
   const { id } = params;
 
   if (!id) {
@@ -142,7 +145,7 @@ const SingleBabyNotificationPage = () => {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleUpdateBabyNotification)}
-          className="mt-6 flex flex-col gap-10 justify-end"
+          className="mt-6 space-y-10"
         >
           <FormField
             control={form.control}

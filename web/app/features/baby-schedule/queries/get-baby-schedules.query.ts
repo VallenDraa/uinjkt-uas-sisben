@@ -1,37 +1,37 @@
 import { QueryClient, queryOptions, useQuery } from "@tanstack/react-query";
 import { QueryConfig } from "~/lib/react-query";
-import { getBabySchedules } from "../api/get-baby-schedules";
+import { getBabySchedules } from "../api/get-baby-schedules.api";
 
 export const GET_BABY_SCHEDULES_QUERY_KEY = "baby-schedules";
 
-export const getBabySchedulesQueryOptions = (hardwareId: string) => {
+export const getBabySchedulesQueryOptions = (hardwareCode: string) => {
   return queryOptions({
     queryKey: [GET_BABY_SCHEDULES_QUERY_KEY],
-    queryFn: () => getBabySchedules(hardwareId),
+    queryFn: () => getBabySchedules(hardwareCode),
   });
 };
 
 export type UseGetBabySchedulesOptions = {
-  hardwareId: string;
+  hardwareCode: string;
   queryConfig?: QueryConfig<typeof getBabySchedulesQueryOptions>;
 };
 
 export const useGetBabySchedules = ({
-  hardwareId,
+  hardwareCode,
   queryConfig,
 }: UseGetBabySchedulesOptions) => {
   return useQuery({
-    ...getBabySchedulesQueryOptions(hardwareId),
+    ...getBabySchedulesQueryOptions(hardwareCode),
     ...queryConfig,
   });
 };
 
 export const prefetchGetBabySchedules = async (
   queryClient: QueryClient,
-  { hardwareId, queryConfig }: UseGetBabySchedulesOptions,
+  { hardwareCode, queryConfig }: UseGetBabySchedulesOptions,
 ) => {
   await queryClient.prefetchQuery({
-    ...getBabySchedulesQueryOptions(hardwareId),
+    ...getBabySchedulesQueryOptions(hardwareCode),
     ...queryConfig,
   });
 

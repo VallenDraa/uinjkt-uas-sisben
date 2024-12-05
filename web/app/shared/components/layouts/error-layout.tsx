@@ -1,5 +1,7 @@
 import { isRouteErrorResponse } from "@remix-run/react";
 import { PageLayout } from "./page-layout";
+import { AlertCircleIcon } from "lucide-react";
+import { Typography } from "../ui/typography";
 
 export type ErrorLayoutProps = {
   error: unknown;
@@ -29,8 +31,15 @@ export const ErrorLayout = ({ error }: ErrorLayoutProps) => {
       description={description}
       showDateTime={false}
       classNames={{
-        header: "grow flex justify-center items-start flex-col-reverse",
+        main: "flex justify-center items-center",
       }}
-    />
+    >
+      <div className="text-center text-muted-foreground">
+        <AlertCircleIcon className="size-16 mx-auto my-auto" />
+        <Typography variant="h2" className="mt-2" tag="p">
+          Oops terjadi error...
+        </Typography>
+      </div>
+    </PageLayout>
   );
 };

@@ -6,7 +6,6 @@ import { Link } from "@remix-run/react";
 import { buttonVariants } from "../ui/button";
 import { MoveLeftIcon } from "lucide-react";
 import { Separator } from "../ui/separator";
-import { ScrollArea } from "../ui/scroll-area";
 
 export type PageLayoutProps = Omit<
   React.HTMLAttributes<HTMLDivElement>,
@@ -83,11 +82,7 @@ export const PageLayout = ({
         </div>
       </header>
 
-      <ScrollArea>
-        <main className={cn("grow py-6 px-4", classNames?.main)}>
-          {children}
-        </main>
-      </ScrollArea>
+      <main className={cn("grow py-6 px-4", classNames?.main)}>{children}</main>
 
       <footer className={cn("pb-6 space-y-6 mt-auto px-4", classNames?.footer)}>
         <Separator />

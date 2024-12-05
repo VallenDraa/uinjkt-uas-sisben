@@ -1,7 +1,14 @@
-import type { MetaFunction } from "@remix-run/node";
+import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import { requirehardwareCodeMiddleware } from "~/middlewares/require-hardware-code.middleware";
 import { LinkCard } from "~/shared/components/elements/link-card";
 import { PageLayout } from "~/shared/components/layouts/page-layout";
 import { BABY_MENU_ITEMS } from "~/shared/constants/menu.contants";
+
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  await requirehardwareCodeMiddleware(request);
+
+  return null;
+};
 
 export const meta: MetaFunction = () => {
   return [

@@ -1,5 +1,5 @@
 import { QueryClient, queryOptions, useQuery } from "@tanstack/react-query";
-import { getBabyNotification } from "../api/get-baby-notification";
+import { getBabyNotification } from "../api/get-baby-notification.api";
 import { QueryConfig } from "~/lib/react-query";
 
 export const GET_BABY_NOTIFICATIONS_QUERY_KEY = "baby-notification";
