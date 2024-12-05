@@ -1,4 +1,3 @@
-// TODO: Handle saving and getting hardware id from session
 import { LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import {
@@ -13,15 +12,15 @@ import { requirehardwareIdMiddleware } from "~/middlewares/require-hardware-id.m
 import { PageLayout } from "~/shared/components/layouts/page-layout";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  await requirehardwareIdMiddleware(request);
+  const { hardwareId } = await requirehardwareIdMiddleware(request);
 
   const queryClient = new QueryClient({ defaultOptions: queryConfig });
-
   const prefetchedQuery = await prefetchGetBabySchedules(queryClient, {
-    hardwareId: "",
+    hardwareId,
   });
 
   return {
+    hardwareId,
     dehydratedState: dehydrate(prefetchedQuery),
   };
 };
@@ -37,7 +36,8 @@ export default function BabySchedulePageWrapper() {
 }
 
 const BabySchedulePage = () => {
-  useBabySchedules({ hardwareId: "", enableQuery: true });
+  const { hardwareId } = useLoaderData<typeof loader>();
+  useBabySchedules({ hardwareId, enableQuery: true });
 
   return (
     <PageLayout title="Jadwal Bayi" backLink={{ name: "Kembali", href: "/" }}>
