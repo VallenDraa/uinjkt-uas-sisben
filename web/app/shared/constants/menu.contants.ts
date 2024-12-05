@@ -16,7 +16,7 @@ export const BABY_MENU_ITEMS = [
   },
   {
     name: "Jadwal Bayi",
-    href: "/baby-schedule",
+    href: "/baby-schedules",
     icon: Calendar1Icon,
     description:
       "Menu untuk melihat jadwal bayi yang digenerate menggunakan AI.",
