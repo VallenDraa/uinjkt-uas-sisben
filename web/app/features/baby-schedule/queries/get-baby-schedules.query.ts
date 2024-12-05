@@ -4,34 +4,34 @@ import { getBabySchedules } from "../api/get-baby-schedules.api";
 
 export const GET_BABY_SCHEDULES_QUERY_KEY = "baby-schedules";
 
-export const getBabySchedulesQueryOptions = (hardwareCode: string) => {
+export const getBabySchedulesQueryOptions = (hardwareId: string) => {
   return queryOptions({
     queryKey: [GET_BABY_SCHEDULES_QUERY_KEY],
-    queryFn: () => getBabySchedules(hardwareCode),
+    queryFn: () => getBabySchedules(hardwareId),
   });
 };
 
 export type UseGetBabySchedulesOptions = {
-  hardwareCode: string;
+  hardwareId: string;
   queryConfig?: QueryConfig<typeof getBabySchedulesQueryOptions>;
 };
 
 export const useGetBabySchedules = ({
-  hardwareCode,
+  hardwareId,
   queryConfig,
 }: UseGetBabySchedulesOptions) => {
   return useQuery({
-    ...getBabySchedulesQueryOptions(hardwareCode),
+    ...getBabySchedulesQueryOptions(hardwareId),
     ...queryConfig,
   });
 };
 
 export const prefetchGetBabySchedules = async (
   queryClient: QueryClient,
-  { hardwareCode, queryConfig }: UseGetBabySchedulesOptions,
+  { hardwareId, queryConfig }: UseGetBabySchedulesOptions,
 ) => {
   await queryClient.prefetchQuery({
-    ...getBabySchedulesQueryOptions(hardwareCode),
+    ...getBabySchedulesQueryOptions(hardwareId),
     ...queryConfig,
   });
 

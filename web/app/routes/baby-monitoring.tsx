@@ -3,15 +3,15 @@ import { useLoaderData } from "@remix-run/react";
 import { DropletsIcon, ThermometerSunIcon } from "lucide-react";
 import { NumberStatsWithIcon } from "~/features/baby-monitoring/components/elements/number-stats-with-icon";
 import { useBabyMonitoringTempsHumidityWebSocket } from "~/features/baby-monitoring/websockets/baby-monitoring-temps-humidity.websocket";
-import { requirehardwareCodeMiddleware } from "~/middlewares/require-hardware-code.middleware";
+import { requirehardwareIdMiddleware } from "~/middlewares/require-hardware-id.middleware";
 import { PageLayout } from "~/shared/components/layouts/page-layout";
 import { Separator } from "~/shared/components/ui/separator";
 import { useIsClient } from "~/shared/hooks/use-is-client";
 import { useMediaQuery } from "~/shared/hooks/use-media-query";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { hardwareCode } = await requirehardwareCodeMiddleware(request);
-  return { hardwareCode };
+  const { hardwareId } = await requirehardwareIdMiddleware(request);
+  return { hardwareId };
 };
 
 export default function BabyMonitoringPageWrapper() {
@@ -21,11 +21,11 @@ export default function BabyMonitoringPageWrapper() {
 }
 
 const BabyMonitoringPage = () => {
-  const { hardwareCode } = useLoaderData<typeof loader>();
+  const { hardwareId } = useLoaderData<typeof loader>();
   const isSmallScreen = useMediaQuery("(max-width: 768px)");
 
   const { lastJsonMessage } =
-    useBabyMonitoringTempsHumidityWebSocket(hardwareCode);
+    useBabyMonitoringTempsHumidityWebSocket(hardwareId);
 
   return (
     <PageLayout

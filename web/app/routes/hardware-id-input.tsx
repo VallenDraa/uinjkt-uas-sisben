@@ -4,9 +4,12 @@ import { Form, useActionData } from "@remix-run/react";
 import { CheckIcon, InfoIcon } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
-import { DEFAULT_HARDWARE_ID_INPUT } from "~/features/hardware-code-input/constants/hardware-code-input.constants";
-import { HardwareCodeInput } from "~/features/hardware-code-input/types/hardware-code-input.types";
-import { hardwareCodeInputValidator } from "~/features/hardware-code-input/validators/hardware-code-input.validator";
+import {
+  DEFAULT_HARDWARE_ID_INPUT,
+  HARDWARE_ID_KEY,
+} from "~/features/hardware-id-input/constants/hardware-id-input.constants";
+import { HardwareIdInput } from "~/features/hardware-id-input/types/hardware-id-input.types";
+import { hardwareIdInputValidator } from "~/features/hardware-id-input/validators/hardware-id-input.validator";
 import { commitSession, getSession } from "~/lib/sessions";
 import { PageLayout } from "~/shared/components/layouts/page-layout";
 import { Button } from "~/shared/components/ui/button";
@@ -20,34 +23,33 @@ import {
   FormMessage,
 } from "~/shared/components/ui/form";
 import { Input } from "~/shared/components/ui/input";
-import { HARDWARE_CODE_KEY } from "~/shared/constants/hardware-code.constants";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
-  const hardwareCode = formData.get("hardwareCode")?.toString();
+  const hardwareId = formData.get("hardwareId")?.toString();
 
-  const session = await getSession(request.headers.get(HARDWARE_CODE_KEY));
+  const session = await getSession(request.headers.get(HARDWARE_ID_KEY));
 
-  if (!hardwareCode) {
+  if (!hardwareId) {
     return { error: "Hardware ID tidak boleh kosong!" };
   }
 
-  session.set(HARDWARE_CODE_KEY, hardwareCode);
+  session.set(HARDWARE_ID_KEY, hardwareId);
   return redirect("/", {
     headers: { "Set-Cookie": await commitSession(session) },
   });
 };
 
-export default function HardwareCodeInputPage() {
-  const form = useForm<HardwareCodeInput>({
-    resolver: zodResolver(hardwareCodeInputValidator),
+export default function HardwareIdInputPage() {
+  const form = useForm<HardwareIdInput>({
+    resolver: zodResolver(hardwareIdInputValidator),
     defaultValues: DEFAULT_HARDWARE_ID_INPUT,
   });
 
   const actionData = useActionData<typeof action>();
   React.useEffect(() => {
     if (actionData?.error) {
-      form.setError("hardwareCode", {
+      form.setError("hardwareId", {
         type: "value",
         message: actionData.error,
       });
@@ -63,11 +65,11 @@ export default function HardwareCodeInputPage() {
         <Form
           className="space-y-10 grow mt-6"
           method="POST"
-          action="/hardware-code-input"
+          action="/hardware-id-input"
         >
           <FormField
             control={form.control}
-            name="hardwareCode"
+            name="hardwareId"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Hardware ID</FormLabel>
@@ -75,7 +77,7 @@ export default function HardwareCodeInputPage() {
                 <FormControl>
                   <Input
                     {...field}
-                    name="hardwareCode"
+                    name="hardwareId"
                     disabled={form.formState.isSubmitting}
                     placeholder="0k123abc098fed"
                   />

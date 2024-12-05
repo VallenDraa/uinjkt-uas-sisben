@@ -38,10 +38,10 @@ import {
 import { babyNotificationsValidator } from "~/features/baby-notification/validators/baby-notifications.validator";
 import { Button } from "~/shared/components/ui/button";
 import { useBabyNotification } from "~/features/baby-notification/hooks/use-baby-notification";
-import { requirehardwareCodeMiddleware } from "~/middlewares/require-hardware-code.middleware";
+import { requirehardwareIdMiddleware } from "~/middlewares/require-hardware-id.middleware";
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
-  await requirehardwareCodeMiddleware(request);
+  await requirehardwareIdMiddleware(request);
 
   const { id } = params;
 

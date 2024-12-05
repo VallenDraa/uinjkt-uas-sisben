@@ -15,7 +15,7 @@ import {
   useGetBabyNotifications,
 } from "~/features/baby-notification/queries/get-baby-notifications.query";
 import { queryConfig } from "~/lib/react-query";
-import { requirehardwareCodeMiddleware } from "~/middlewares/require-hardware-code.middleware";
+import { requirehardwareIdMiddleware } from "~/middlewares/require-hardware-id.middleware";
 import { DataFilters } from "~/shared/components/elements/data-filters";
 
 import { VirtualList } from "~/shared/components/elements/virtual-list";
@@ -29,7 +29,7 @@ import { FilterParameters } from "~/shared/types/api.types";
 import { getSearchParamsFromUrl } from "~/shared/utils/url";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  await requirehardwareCodeMiddleware(request);
+  await requirehardwareIdMiddleware(request);
 
   const filterParameters = getSearchParamsFromUrl<FilterParameters>(
     new URL(request.url),

@@ -8,7 +8,7 @@ urlpatterns = [
         name="monitor-hardware-list-create-view",
     ),
     path(
-        "monitor-hardwares/<uuid:pk>/",
+        "monitor-hardwares/<str:pk>/",
         views.MonitorHardwareRetrieveUpdateDestroyView.as_view(),
         name="monitor-hardware-retrieve-update-destroy-view",
     ),

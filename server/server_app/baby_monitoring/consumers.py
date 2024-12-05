@@ -5,8 +5,8 @@ from asgiref.sync import async_to_sync
 
 class BabyMonitoringVideoConsumer(WebsocketConsumer):
     def connect(self):
-        self.hardware_code = self.scope["url_route"]["kwargs"]["hardware_code"]
-        self.room_group_name = f"chat_{self.hardware_code}"
+        self.hardware_id = self.scope["url_route"]["kwargs"]["hardware_id"]
+        self.room_group_name = f"chat_{self.hardware_id}"
 
         # Add the client to the group
         async_to_sync(self.channel_layer.group_add)(
@@ -39,8 +39,8 @@ class BabyMonitoringVideoConsumer(WebsocketConsumer):
 
 class BabyMonitoringTempsHumidityConsumer(WebsocketConsumer):
     def connect(self):
-        self.hardware_code = self.scope["url_route"]["kwargs"]["hardware_code"]
-        self.room_group_name = f"chat_{self.hardware_code}"
+        self.hardware_id = self.scope["url_route"]["kwargs"]["hardware_id"]
+        self.room_group_name = f"chat_{self.hardware_id}"
 
         # Add the client to the group
         async_to_sync(self.channel_layer.group_add)(

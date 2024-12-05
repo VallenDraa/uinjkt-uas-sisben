@@ -9,16 +9,16 @@ import {
 import { useBabySchedules } from "~/features/baby-schedule/hooks/use-baby-schedules";
 import { prefetchGetBabySchedules } from "~/features/baby-schedule/queries/get-baby-schedules.query";
 import { queryConfig } from "~/lib/react-query";
-import { requirehardwareCodeMiddleware } from "~/middlewares/require-hardware-code.middleware";
+import { requirehardwareIdMiddleware } from "~/middlewares/require-hardware-id.middleware";
 import { PageLayout } from "~/shared/components/layouts/page-layout";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  await requirehardwareCodeMiddleware(request);
+  await requirehardwareIdMiddleware(request);
 
   const queryClient = new QueryClient({ defaultOptions: queryConfig });
 
   const prefetchedQuery = await prefetchGetBabySchedules(queryClient, {
-    hardwareCode: "",
+    hardwareId: "",
   });
 
   return {
@@ -37,7 +37,7 @@ export default function BabySchedulePageWrapper() {
 }
 
 const BabySchedulePage = () => {
-  useBabySchedules({ hardwareCode: "", enableQuery: true });
+  useBabySchedules({ hardwareId: "", enableQuery: true });
 
   return (
     <PageLayout title="Jadwal Bayi" backLink={{ name: "Kembali", href: "/" }}>

@@ -16,7 +16,6 @@ class MonitorHardwareListCreateView(ListCreateAPIView):
         filters.SearchFilter,
         filters.OrderingFilter,
     ]
-    search_fields = ["hardware_code"]
     ordering_fields = ["created_at"]
 
 

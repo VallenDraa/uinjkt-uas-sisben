@@ -2,7 +2,7 @@ import { createCookieSessionStorage } from "@remix-run/node";
 import { getEnv } from "~/config/env";
 
 export type SessionData = {
-  hardwareCode: string;
+  hardwareId: string;
 };
 
 export type SessionFlashData = {

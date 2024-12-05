@@ -5,9 +5,9 @@ import { WEBSOCKET_CONFIG } from "~/lib/websocket";
 export const BABY_MONITORING_VIDEO_WS_URL =
   getEnv("WS_URL") + "/baby-monitoring/video";
 
-export const useBabyMonitoringVideoWebSocket = (hardwareCode: string) => {
+export const useBabyMonitoringVideoWebSocket = (hardwareId: string) => {
   const socket = useWebSocket(
-    `${BABY_MONITORING_VIDEO_WS_URL}/${hardwareCode}/`,
+    `${BABY_MONITORING_VIDEO_WS_URL}/${hardwareId}/`,
     WEBSOCKET_CONFIG,
   );
 

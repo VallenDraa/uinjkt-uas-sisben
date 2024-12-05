@@ -2,21 +2,21 @@ import { useGenerateBabySchedules } from "../queries/generate-baby-schedules.que
 import { useGetBabySchedules } from "../queries/get-baby-schedules.query";
 
 export type UseBabySchedules = {
-  hardwareCode: string;
+  hardwareId: string;
   enableQuery: boolean;
 };
 
 export const useBabySchedules = ({
-  hardwareCode,
+  hardwareId,
   enableQuery,
 }: UseBabySchedules) => {
   const babySchedulesQuery = useGetBabySchedules({
-    hardwareCode,
+    hardwareId,
     queryConfig: { enabled: enableQuery },
   });
 
   const { mutateAsync: generateBabySchedules } = useGenerateBabySchedules({
-    hardwareCode,
+    hardwareId,
   });
 
   return {

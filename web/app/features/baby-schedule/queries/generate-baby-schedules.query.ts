@@ -4,22 +4,22 @@ import { generateBabySchedules } from "../api/generate-baby-schedules.api";
 import { getBabySchedulesQueryOptions } from "./get-baby-schedules.query";
 
 type UseGenerateBabySchedulesOptions = {
-  hardwareCode: string;
+  hardwareId: string;
   mutationConfig?: MutationConfig<typeof generateBabySchedules>;
 };
 
 export const useGenerateBabySchedules = ({
-  hardwareCode,
+  hardwareId,
   mutationConfig,
 }: UseGenerateBabySchedulesOptions) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     ...mutationConfig,
-    mutationFn: () => generateBabySchedules(hardwareCode),
+    mutationFn: () => generateBabySchedules(hardwareId),
     onSuccess: data => {
       queryClient.setQueryData(
-        getBabySchedulesQueryOptions(hardwareCode).queryKey,
+        getBabySchedulesQueryOptions(hardwareId).queryKey,
         () => data,
       );
     },
