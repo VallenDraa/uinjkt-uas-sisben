@@ -1,6 +1,7 @@
 // #include "esp_camera.h"
 #include <WiFi.h>
 #include <ArduinoWebsockets.h>
+#include <DHT.h>
 // #include "esp_timer.h"
 // #include "img_converters.h"
 // #include "fb_gfx.h"
@@ -8,6 +9,11 @@
 // #include "soc/rtc_cntl_reg.h" //disable brownout problems
 // #include "driver/gpio.h"
 #include "env.h"
+
+// DHT22 Configuration
+#define DHT_PIN 14
+#define DHT_TYPE DHT22
+DHT dht(DHT_PIN, DHT_TYPE);
 
 // configuration for AI Thinker Camera board
 #define PWDN_GPIO_NUM 32
@@ -125,9 +131,16 @@ esp_err_t init_wifi()
 
 void sendTempsAndHumidity()
 {
-  float tempCelcius = random(0, 50) / 10.0;
-  float tempFarenheit = random(30, 100) / 10.0;
-  float humidity = random(0, 100);
+
+  float humidity = dht.readHumidity();
+  float tempCelcius = dht.readTemperature();
+  float tempFarenheit = dht.readTemperature(true);
+
+  if (isnan(humidity) || isnan(tempCelcius) || isnan(tempFarenheit)) { 
+    Serial.println(F("Failed to read from DHT sensor!")); 
+
+    return; 
+  }
 
   // Construct JSON message
   String jsonMessage = "{\"tempCelcius\": " + String(tempCelcius, 1) +
@@ -149,6 +162,7 @@ void setup()
 
   // init_camera();
   init_wifi();
+  dht.begin();
 }
 
 void loop()
