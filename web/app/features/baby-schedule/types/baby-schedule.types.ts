@@ -10,6 +10,6 @@ export type BabySchedule = {
 
 export type PartsOfDay = "morning" | "afternoon" | "evening" | "night";
 export type BabySchedulesResponse = {
-  parts_of_day: PartsOfDay;
+  part_of_day: PartsOfDay;
   schedules: BabySchedule[];
 };

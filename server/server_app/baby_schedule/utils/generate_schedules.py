@@ -3,10 +3,12 @@ import json
 import os
 from mistralai import Mistral
 
+
 client = Mistral(api_key=os.environ.get("LLM_API_KEY"))
 
 
-def generate_schedules(client: Mistral, notifications: list[map]):
+def generate_schedules(client: Mistral, serialized_notifications: str):
+
     chat_response = client.chat.complete(
         model="mistral-large-latest",
         messages=[
@@ -17,7 +19,7 @@ def generate_schedules(client: Mistral, notifications: list[map]):
                     ketika dia menangis ataupun merasakan ketidaknyamanan. Data tersebut
                     disimpan sebagai JSON. Berikut adalah jsonnya: 
                     
-                    {json.dumps(notifications)}
+                    {serialized_notifications}
                     
                     Dari json tersebut saya mau kamu untuk membuat sebuah schedule perharinya. Schedulenya berupa
                     hal yang kira-kira sangatlah esensial bagi bayinya, sehingga dirasa harus dilakukan oleh orang tua
@@ -35,6 +37,7 @@ def generate_schedules(client: Mistral, notifications: list[map]):
     )
 
     schedules: list = json.loads(chat_response.choices[0].message.content)
+    print("🚀 ~ schedules:", schedules)
 
     # Process time strings
     for schedule in schedules:

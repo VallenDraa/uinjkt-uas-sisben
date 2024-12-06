@@ -2,6 +2,8 @@ import * as React from "react";
 import { toast } from "sonner";
 import { useGenerateBabySchedules } from "../queries/generate-baby-schedules.query";
 import { useGetBabySchedules } from "../queries/get-baby-schedules.query";
+import { isBabySchedulesEmpty } from "../utils/baby-schedule.utils";
+import { useAlternatingText } from "~/shared/hooks/use-alternating-text";
 
 export type UseBabySchedules = {
   hardwareId: string;
@@ -20,6 +22,9 @@ export const useBabySchedules = ({
     hardwareId,
     queryConfig: { enabled: enableQuery },
   });
+  const isSchedulesEmpty = React.useMemo(() => {
+    return isBabySchedulesEmpty(babySchedulesQuery.data ?? []);
+  }, [babySchedulesQuery.data]);
 
   const {
     mutateAsync: generateBabySchedules,
@@ -31,20 +36,41 @@ export const useBabySchedules = ({
   });
   const handleGenerateBabySchedules = React.useCallback(async () => {
     try {
-      await generateBabySchedules({
+      const babySchedules = await generateBabySchedules({
         hardware_id: hardwareId,
         notification_from: notificationFrom,
         notification_to: notificationTo,
       });
-      toast.success("Berhasil membuat jadwal bayi baru");
+
+      if (isBabySchedulesEmpty(babySchedules)) {
+        toast.error(
+          "Sepertinya dari range tanggal yang kamu pilih, tidak ada notifikasi untuk membuat jadwal",
+        );
+      } else {
+        toast.success("Berhasil membuat jadwal bayi baru");
+      }
     } catch (error) {
       toast.error("Gagal membuat jadwal bayi");
     }
   }, [generateBabySchedules, hardwareId, notificationFrom, notificationTo]);
 
+  const loadingGeneratingText = useAlternatingText({
+    interval: 4000,
+    textList: [
+      "Menyesuaikan jadwal bayi anda ...",
+      "Mengoptimalkan jadwal bayi ...",
+      "Lagi otw buat jadwal nih ...",
+      "Sabar yaa, bentar lagi ...",
+      "Ga sabaran banget, bentar lagi et dah ...",
+    ],
+    isActive: generateBabySchedulesMutation.isPending,
+  });
+
   return {
     babySchedulesQuery,
+    isSchedulesEmpty,
     handleGenerateBabySchedules,
     generateBabySchedulesMutation,
+    loadingGeneratingText,
   };
 };

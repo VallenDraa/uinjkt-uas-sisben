@@ -1,9 +1,12 @@
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 
 from baby_notification.models import BabyNotificationModel
 from monitor_hardware.models import MonitorHardwareModel
+from baby_notification.filters import BabyNotificationFilter
 from .utils.organize_schedules_parts_of_day import organize_schedules_parts_of_day
 from .filters import BabyScheduleFilter
 from .serializers import OrganizedSchedulesSerializer
@@ -86,14 +89,33 @@ class BabyScheduleViewSet(viewsets.ViewSet):
 
         BabyScheduleModel.objects.filter(hardware_id=hardware_id).delete()
 
-        filterset = BabyScheduleFilter(
-            request.query_params, queryset=BabyNotificationModel.objects.all()
+        # Extract filter data from the request body
+        notification_from = request.data.get("notification_from")
+        notification_to = request.data.get("notification_to")
+
+        # Validate that the required fields are present
+        if not notification_from or not notification_to:
+            return Response(
+                {
+                    "error": "Both 'notification_from' and 'notification_to' are required."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Filter notifications within the specified timeframe
+        notifications_queryset = BabyNotificationModel.objects.filter(
+            hardware_id=hardware_instance,
+            created_at__gte=notification_from,
+            created_at__lte=notification_to,
         )
-        notifications_data = list(filterset.data.values())
+        notifications_data = list(notifications_queryset.values())
+
+        if len(notifications_data) is 0:
+            response_data = OrganizedSchedulesSerializer([], many=True).data
+            return Response(response_data)
 
         new_schedules = generate_schedules(
-            client,
-            notifications_data,
+            client, json.dumps(notifications_data, cls=DjangoJSONEncoder)
         )
         bulk_schedules = BabyScheduleModel.objects.bulk_create(
             [

@@ -11,7 +11,12 @@ export type PageLayoutProps = Omit<
   React.HTMLAttributes<HTMLDivElement>,
   "className"
 > & {
-  backLink?: { name: string; href: string; className?: string };
+  backLink?: {
+    disabled?: boolean;
+    name: string;
+    href: string;
+    className?: string;
+  };
   showDateTime?: boolean;
   children?: React.ReactNode;
   title: React.ReactNode;
@@ -55,12 +60,14 @@ export const PageLayout = ({
       >
         {backLink && (
           <Link
+            aria-disabled={backLink?.disabled}
             className={cn(
               buttonVariants({ variant: "link", size: "lg" }),
               "px-0",
+              backLink?.disabled && "pointer-events-none",
               backLink.className,
             )}
-            to={backLink.href}
+            to={backLink?.disabled ? "#" : backLink.href}
           >
             <MoveLeftIcon className="size-4 mr-2" />
             {backLink.name}

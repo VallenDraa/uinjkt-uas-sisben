@@ -1,7 +1,7 @@
 import { isRouteErrorResponse } from "@remix-run/react";
 import { PageLayout } from "./page-layout";
 import { AlertCircleIcon } from "lucide-react";
-import { Typography } from "../ui/typography";
+import { TitleIconAlert } from "../sections/title-icon-alert";
 
 export type ErrorLayoutProps = {
   error: unknown;
@@ -34,12 +34,10 @@ export const ErrorLayout = ({ error }: ErrorLayoutProps) => {
         main: "flex justify-center items-center",
       }}
     >
-      <div className="text-center text-muted-foreground">
-        <AlertCircleIcon className="size-16 mx-auto my-auto" />
-        <Typography variant="h2" className="mt-2" tag="p">
-          Oops terjadi error...
-        </Typography>
-      </div>
+      <TitleIconAlert
+        icon={AlertCircleIcon}
+        description="Oops terjadi error..."
+      />
     </PageLayout>
   );
 };

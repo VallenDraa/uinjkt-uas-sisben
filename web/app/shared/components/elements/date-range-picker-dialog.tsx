@@ -35,6 +35,7 @@ export type DateRangePickerDialogProps = {
   initialDateTo?: Date | string;
   range?: DateRange;
   setRange?: React.Dispatch<React.SetStateAction<DateRange>>;
+  calendarProps?: React.ComponentProps<typeof Calendar>;
 };
 
 const getDateAdjustedForTimezone = (dateInput: Date | string): Date => {
@@ -67,6 +68,7 @@ export const DateRangePickerDialog = ({
   onUpdate,
   range,
   setRange,
+  calendarProps,
 }: DateRangePickerDialogProps): JSX.Element => {
   const isSmallScreen = useMediaQuery("(max-width: 640px)");
   const [isOpen, setIsOpen] = React.useState(false);
@@ -114,7 +116,9 @@ export const DateRangePickerDialog = ({
 
             <Typography tag="span" variant="label" className="h-auto">
               {`${formatDate(rangeValue.from)}${
-                rangeValue.to != null ? " - " + formatDate(rangeValue.to) : ""
+                rangeValue.to !== null
+                  ? " - " + formatDate(rangeValue.to ?? new Date())
+                  : ""
               }`}
             </Typography>
           </Button>
@@ -134,7 +138,8 @@ export const DateRangePickerDialog = ({
               value={rangeValue.from}
               onChange={date => {
                 const toDate =
-                  rangeValue.to == null || date > rangeValue.to
+                  rangeValue.to === null ||
+                  (rangeValue.to && date > rangeValue.to)
                     ? date
                     : rangeValue.to;
                 setRangeValue(prevRange => ({
@@ -160,11 +165,15 @@ export const DateRangePickerDialog = ({
           </div>
 
           <Calendar
+            {...calendarProps}
             mode="range"
             className="flex justify-center"
             onSelect={(value: { from?: Date; to?: Date } | undefined) => {
-              if (value?.from != null) {
-                setRangeValue({ from: value.from, to: value?.to });
+              if (value?.from !== null) {
+                setRangeValue({
+                  from: value?.from ?? new Date(),
+                  to: value?.to,
+                });
               }
             }}
             selected={range}

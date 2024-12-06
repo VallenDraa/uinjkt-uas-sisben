@@ -1,12 +1,17 @@
 import * as React from "react";
 import { LoaderFunctionArgs } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { useBeforeUnload, useBlocker, useLoaderData } from "@remix-run/react";
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from "@tanstack/react-query";
-import { CalendarIcon, Loader2Icon } from "lucide-react";
+import {
+  CalendarIcon,
+  Loader2Icon,
+  PackageOpenIcon,
+  ZapIcon,
+} from "lucide-react";
 import { useBabySchedules } from "~/features/baby-schedule/hooks/use-baby-schedules";
 import { prefetchGetBabySchedules } from "~/features/baby-schedule/queries/get-baby-schedules.query";
 import { queryConfig } from "~/lib/react-query";
@@ -26,6 +31,7 @@ import {
 } from "~/shared/components/elements/timeline";
 import { PageLayout } from "~/shared/components/layouts/page-layout";
 import { Button } from "~/shared/components/ui/button";
+import { TitleIconAlert } from "~/shared/components/sections/title-icon-alert";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { hardwareId } = await requirehardwareIdMiddleware(request);
@@ -61,53 +67,98 @@ const BabySchedulePage = () => {
 
   const {
     babySchedulesQuery,
+    isSchedulesEmpty,
     handleGenerateBabySchedules,
     generateBabySchedulesMutation,
+    loadingGeneratingText,
   } = useBabySchedules({
     hardwareId,
     notificationFrom: dateRange.from.toISOString(),
-    notificationTo: dateRange.to!.toISOString(),
+    notificationTo: dateRange.to?.toISOString() ?? new Date().toISOString(),
     enableQuery: true,
   });
 
-  const initialDate = new Date();
+  // Prevent user from leaving the page while generating baby schedules
+  useBeforeUnload(
+    React.useCallback(
+      e => {
+        if (generateBabySchedulesMutation.isPending) {
+          e.preventDefault();
+          e.returnValue = "";
+        }
+      },
+      [generateBabySchedulesMutation.isPending],
+    ),
+  );
+  useBlocker(generateBabySchedulesMutation.isPending);
 
   return (
-    <PageLayout title="Jadwal Bayi" backLink={{ name: "Kembali", href: "/" }}>
-      <Timeline className="mb-10">
-        {(babySchedulesQuery.isLoading || !babySchedulesQuery.data) && (
-          <TimelineItemSkeleton
-            amount={6}
-            className="animate-in fade-in duration-300"
+    <PageLayout
+      title="Jadwal Bayi"
+      backLink={{
+        name: "Kembali",
+        href: "/",
+        disabled: generateBabySchedulesMutation.isPending,
+      }}
+      classNames={{ main: "flex md:block flex-col" }}
+    >
+      <Timeline className="mb-10 grow flex flex-col justify-center">
+        {generateBabySchedulesMutation.isPending && (
+          <TitleIconAlert
+            classNames={{
+              icon: "animate-bounce duration-[4000ms] ease-in-out",
+            }}
+            icon={ZapIcon}
+            description={loadingGeneratingText}
           />
         )}
 
-        {!babySchedulesQuery.isLoading &&
-          babySchedulesQuery.data?.map(data => {
-            return data.schedules.map(schedule => (
-              <TimelineItem
-                key={schedule.id}
-                className="animate-in fade-in duration-300"
-              >
-                <TimelineHeader>
-                  <TimelineTime>
-                    {new Date(schedule.time).toLocaleTimeString()}
-                  </TimelineTime>
-                  <TimelineTitle>{schedule.title}</TimelineTitle>
-                </TimelineHeader>
-                <TimelineDescription>
-                  {schedule.description}
-                </TimelineDescription>
-              </TimelineItem>
-            ));
-          })}
+        {!generateBabySchedulesMutation.isPending &&
+          (babySchedulesQuery.isLoading || !babySchedulesQuery.data) && (
+            <TimelineItemSkeleton
+              amount={6}
+              className="animate-in fade-in duration-300"
+            />
+          )}
+
+        {!generateBabySchedulesMutation.isPending &&
+          !babySchedulesQuery.isLoading && (
+            <>
+              {isSchedulesEmpty && (
+                <TitleIconAlert
+                  icon={PackageOpenIcon}
+                  description="Belum ada jadwal yang dibuat. Silahkan buat jadwal baru!"
+                />
+              )}
+
+              {babySchedulesQuery.data?.map(data => {
+                return data.schedules.map(schedule => (
+                  <TimelineItem
+                    key={schedule.id}
+                    className="animate-in fade-in duration-300"
+                  >
+                    <TimelineHeader>
+                      <TimelineTime>
+                        {new Date(schedule.time).toLocaleTimeString()}
+                      </TimelineTime>
+                      <TimelineTitle>{schedule.title}</TimelineTitle>
+                    </TimelineHeader>
+                    <TimelineDescription>
+                      {schedule.description}
+                    </TimelineDescription>
+                  </TimelineItem>
+                ));
+              })}
+            </>
+          )}
       </Timeline>
 
       <DateRangePickerDialog
+        calendarProps={{
+          disabled: { after: new Date() },
+        }}
         showHeader
-        disableUpdateButton={
-          generateBabySchedulesMutation.isPending || !dateRange.to
-        }
+        disableUpdateButton={generateBabySchedulesMutation.isPending}
         range={dateRange}
         setRange={setDateRange}
         title="Buat Jadwal"
@@ -127,8 +178,8 @@ const BabySchedulePage = () => {
         }
         cancelText="Batal"
         updateText="Buat Jadwal"
-        initialDateFrom={initialDate}
-        initialDateTo={initialDate}
+        initialDateFrom={dateRange.from}
+        initialDateTo={dateRange.to}
         onUpdate={handleGenerateBabySchedules}
       />
     </PageLayout>

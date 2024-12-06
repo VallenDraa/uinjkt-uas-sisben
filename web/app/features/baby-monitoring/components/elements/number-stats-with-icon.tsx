@@ -29,6 +29,7 @@ export const NumberStatsWithIcon = ({
       )}
     >
       <Icon
+        strokeWidth={1.5}
         className={cn(
           "absolute top-2 right-2 opacity-10 size-20",
           classNames?.icon,

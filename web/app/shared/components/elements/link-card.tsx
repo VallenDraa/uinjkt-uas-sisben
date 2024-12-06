@@ -1,5 +1,5 @@
 import { Link } from "@remix-run/react";
-import { MoveRightIcon } from "lucide-react";
+import { LucideIcon, MoveRightIcon } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -13,7 +13,7 @@ export type LinkCardProps = {
   name: string;
   description: string;
   href: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
 };
 
 export const LinkCard = ({
@@ -35,7 +35,10 @@ export const LinkCard = ({
         </CardHeader>
 
         <CardContent className="text-right">
-          <Icon className="absolute top-6 right-6 opacity-10 size-24 group-hover:text-primary transition-colors duration-300" />
+          <Icon
+            strokeWidth={1.5}
+            className="absolute top-6 right-6 opacity-10 size-24 group-hover:text-primary transition-colors duration-300"
+          />
 
           <Typography
             variant="lead"
