@@ -27,7 +27,7 @@ def generate_schedules(client: Mistral, serialized_notifications: str):
                     dan malam. Saya mau nilai balikannya juga berupa json dan HANYA jsonnya saja! 
                     
                     Untuk format jsonnya adalah sebagai berikut: 
-                    {'{ "title": <string>, "description": <string>, "time": <isostring>}'}
+                    {'''{ "title": <string>, "description": <string>, "time": <YYYY-MM-DD'T'hh:mm:ss'Z'>}'''}
                     
                     Ingat saya mau nilai balikannya hanya json.
                 """,
