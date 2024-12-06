@@ -1,9 +1,9 @@
 from rest_framework import viewsets, status, filters
-from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 
 from baby_notification.models import BabyNotificationModel
+from monitor_hardware.models import MonitorHardwareModel
 from .utils.organize_schedules_parts_of_day import organize_schedules_parts_of_day
 from .filters import BabyScheduleFilter
 from .serializers import OrganizedSchedulesSerializer
@@ -73,31 +73,39 @@ class BabyScheduleViewSet(viewsets.ViewSet):
             status=status.HTTP_204_NO_CONTENT,
         )
 
-    @action(detail=False, methods=["post"], url_path="generate")
-    def generate(self, request, hardware_id=None):
+    def create(self, request, hardware_id=None):
         self.hardware_id = hardware_id
 
-        # Delete existing schedules for the hardware ID
+        try:
+            hardware_instance = MonitorHardwareModel.objects.get(id=hardware_id)
+        except MonitorHardwareModel.DoesNotExist:
+            return Response(
+                {"error": f"Hardware with code '{hardware_id}' not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
         BabyScheduleModel.objects.filter(hardware_id=hardware_id).delete()
 
-        # Filter notifications within a timeframe provided in the request
         filterset = BabyScheduleFilter(
             request.query_params, queryset=BabyNotificationModel.objects.all()
         )
-        notifications = filterset.qs
+        notifications_data = list(filterset.data.values())
 
-        # Generate new schedules
-        new_schedules = generate_schedules(client, notifications)
+        new_schedules = generate_schedules(
+            client,
+            notifications_data,
+        )
+        bulk_schedules = BabyScheduleModel.objects.bulk_create(
+            [
+                BabyScheduleModel(hardware_id=hardware_instance, **schedule)
+                for schedule in new_schedules
+            ]
+        )
 
-        # Create new schedule instances
-        bulk_schedules = [
-            BabyScheduleModel(hardware_id=hardware_id, **schedule)
-            for schedule in new_schedules
-        ]
-        BabyScheduleModel.objects.bulk_create(bulk_schedules)
-
-        response_data = OrganizedSchedulesSerializer(bulk_schedules, many=True).data
-
+        organized_schedules = organize_schedules_parts_of_day(bulk_schedules)
+        response_data = OrganizedSchedulesSerializer(
+            organized_schedules, many=True
+        ).data
         return Response(
             response_data,
             status=status.HTTP_201_CREATED,

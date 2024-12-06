@@ -9,18 +9,32 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
+  DrawerDescription,
   DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
   DrawerTrigger,
 } from "./drawer";
 import { useMediaQuery } from "~/shared/hooks/use-media-query";
+import { cn } from "~/shared/utils/shadcn";
 
-export type DateRangePickerProps = {
-  /** Click handler for applying the updates from DateRangePicker. */
-  onUpdate?: (values: { range: DateRange }) => void;
+export type DateRangePickerDialogProps = {
+  disableUpdateButton?: boolean;
+  disableCancelButton?: boolean;
+  showHeader?: boolean;
+  title?: string;
+  description?: string;
+  trigger?: React.ReactNode;
+  cancelText?: string;
+  updateText?: string;
+  /** Click handler for applying the updates from DateRangePickerDialog. */
+  onUpdate?: (range: DateRange) => void;
   /** Initial value for start date */
   initialDateFrom?: Date | string;
   /** Initial value for end date */
   initialDateTo?: Date | string;
+  range?: DateRange;
+  setRange?: React.Dispatch<React.SetStateAction<DateRange>>;
 };
 
 const getDateAdjustedForTimezone = (dateInput: Date | string): Date => {
@@ -37,28 +51,38 @@ const getDateAdjustedForTimezone = (dateInput: Date | string): Date => {
   }
 };
 
-type DateRange = {
-  from: Date;
-  to: Date | undefined;
-};
+export type DateRange = { from: Date; to: Date | undefined };
 
-export const DateRangePicker = ({
+export const DateRangePickerDialog = ({
+  disableUpdateButton,
+  disableCancelButton,
+  showHeader = false,
+  title,
+  description,
+  updateText,
+  cancelText,
+  trigger,
   initialDateFrom = new Date(new Date().setHours(0, 0, 0, 0)),
   initialDateTo,
   onUpdate,
-}: DateRangePickerProps): JSX.Element => {
+  range,
+  setRange,
+}: DateRangePickerDialogProps): JSX.Element => {
   const isSmallScreen = useMediaQuery("(max-width: 640px)");
   const [isOpen, setIsOpen] = React.useState(false);
 
-  const [range, setRange] = React.useState<DateRange>({
+  const [innerRange, setInnerRange] = React.useState<DateRange>({
     from: getDateAdjustedForTimezone(initialDateFrom),
     to: initialDateTo
       ? getDateAdjustedForTimezone(initialDateTo)
       : getDateAdjustedForTimezone(initialDateFrom),
   });
 
+  const rangeValue = range ?? innerRange;
+  const setRangeValue = setRange ?? setInnerRange;
+
   const resetValues = React.useCallback((): void => {
-    setRange({
+    setRangeValue({
       from:
         typeof initialDateFrom === "string"
           ? getDateAdjustedForTimezone(initialDateFrom)
@@ -71,7 +95,7 @@ export const DateRangePicker = ({
         ? getDateAdjustedForTimezone(initialDateFrom)
         : initialDateFrom,
     });
-  }, [initialDateFrom, initialDateTo]);
+  }, [initialDateFrom, initialDateTo, setRangeValue]);
 
   return (
     <Drawer
@@ -84,25 +108,36 @@ export const DateRangePicker = ({
       }}
     >
       <DrawerTrigger asChild>
-        <Button variant="outline">
-          <CalendarIcon className="size-4" />
+        {trigger ?? (
+          <Button variant="outline">
+            <CalendarIcon className="size-4" />
 
-          <Typography tag="span" variant="label" className="h-auto">
-            {`${formatDate(range.from)}${
-              range.to != null ? " - " + formatDate(range.to) : ""
-            }`}
-          </Typography>
-        </Button>
+            <Typography tag="span" variant="label" className="h-auto">
+              {`${formatDate(rangeValue.from)}${
+                rangeValue.to != null ? " - " + formatDate(rangeValue.to) : ""
+              }`}
+            </Typography>
+          </Button>
+        )}
       </DrawerTrigger>
       <DrawerContent>
         <div className="max-w-[960px] mx-auto w-full pt-4">
+          <DrawerHeader className={cn(showHeader ? "mb-4" : "sr-only")}>
+            <DrawerTitle>{title ?? "Date Range Picker Dialog"}</DrawerTitle>
+            <DrawerDescription>
+              {description ?? "Date Range Picker Dialog"}
+            </DrawerDescription>
+          </DrawerHeader>
+
           <div className="flex gap-2 items-center justify-center">
             <DateInput
-              value={range.from}
+              value={rangeValue.from}
               onChange={date => {
                 const toDate =
-                  range.to == null || date > range.to ? date : range.to;
-                setRange(prevRange => ({
+                  rangeValue.to == null || date > rangeValue.to
+                    ? date
+                    : rangeValue.to;
+                setRangeValue(prevRange => ({
                   ...prevRange,
                   from: date,
                   to: toDate,
@@ -111,10 +146,11 @@ export const DateRangePicker = ({
             />
             <div className="py-1">-</div>
             <DateInput
-              value={range.to}
+              value={rangeValue.to}
               onChange={date => {
-                const fromDate = date < range.from ? date : range.from;
-                setRange(prevRange => ({
+                const fromDate =
+                  date < rangeValue.from ? date : rangeValue.from;
+                setRangeValue(prevRange => ({
                   ...prevRange,
                   from: fromDate,
                   to: date,
@@ -128,7 +164,7 @@ export const DateRangePicker = ({
             className="flex justify-center"
             onSelect={(value: { from?: Date; to?: Date } | undefined) => {
               if (value?.from != null) {
-                setRange({ from: value.from, to: value?.to });
+                setRangeValue({ from: value.from, to: value?.to });
               }
             }}
             selected={range}
@@ -144,23 +180,25 @@ export const DateRangePicker = ({
 
           <DrawerFooter>
             <Button
+              disabled={disableUpdateButton}
               onClick={() => {
                 setIsOpen(false);
-                onUpdate?.({ range });
+                onUpdate?.(rangeValue);
               }}
             >
-              Perbarui
+              {updateText ?? "Perbarui"}
             </Button>
 
             <DrawerClose asChild>
               <Button
+                disabled={disableCancelButton}
                 onClick={() => {
                   setIsOpen(false);
                   resetValues();
                 }}
                 variant="ghost"
               >
-                Tutup
+                {cancelText ?? "Tutup"}
               </Button>
             </DrawerClose>
           </DrawerFooter>
@@ -170,4 +208,4 @@ export const DateRangePicker = ({
   );
 };
 
-DateRangePicker.displayName = "DateRangePicker";
+DateRangePickerDialog.displayName = "DateRangePickerDialog";

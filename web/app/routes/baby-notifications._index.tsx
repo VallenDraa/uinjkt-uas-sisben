@@ -1,4 +1,3 @@
-// TODO: Fix ssr not rendering the list items
 import { LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
@@ -65,6 +64,7 @@ const BabyNotificationsPage = () => {
   const babyNotificationsQuery = useGetBabyNotifications({
     filterParameters: filters,
   });
+
   const flatItems = React.useMemo(
     () => ({
       count: babyNotificationsQuery.data?.pages.at(-1)?.count ?? 0,

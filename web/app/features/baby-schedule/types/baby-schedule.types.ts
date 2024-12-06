@@ -3,6 +3,7 @@ export type BabySchedule = {
   hardware_id: string;
   title: string;
   description: string;
+  time: string;
   created_at: string;
   updated_at: string;
 };

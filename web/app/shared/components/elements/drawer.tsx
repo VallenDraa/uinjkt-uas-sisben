@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Drawer as DrawerPrimitive } from "vaul";
 import { cn } from "~/shared/utils/shadcn";
+import { typographyVariants } from "../ui/typography";
 
 export const Drawer = ({
   shouldScaleBackground = true,
@@ -80,10 +81,7 @@ export const DrawerTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DrawerPrimitive.Title
     ref={ref}
-    className={cn(
-      "text-lg font-semibold leading-none tracking-tight",
-      className,
-    )}
+    className={cn(typographyVariants({ variant: "h3" }), className)}
     {...props}
   />
 ));
@@ -95,7 +93,7 @@ export const DrawerDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DrawerPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn(typographyVariants({ variant: "lead-small" }), className)}
     {...props}
   />
 ));

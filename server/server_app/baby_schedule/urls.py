@@ -7,7 +7,7 @@ router = SimpleRouter()
 urlpatterns = [
     path(
         "baby-schedules/<str:hardware_id>/",
-        BabyScheduleViewSet.as_view({"get": "list", "post": "generate"}),
+        BabyScheduleViewSet.as_view({"get": "list", "post": "create"}),
         name="baby-schedules-list",
     ),
     path(
