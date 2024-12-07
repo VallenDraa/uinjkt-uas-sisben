@@ -1,5 +1,5 @@
 export type BabyMonitoringTempsHumidity = {
-  tempCelcius: number;
-  tempFarenheit: number;
+  temp_celcius: number;
+  temp_farenheit: number;
   humidity: number;
 };

@@ -3,9 +3,12 @@ import { useLoaderData } from "@remix-run/react";
 import { DropletsIcon, ThermometerSunIcon } from "lucide-react";
 import { NumberStatsWithIcon } from "~/features/baby-monitoring/components/elements/number-stats-with-icon";
 import { useBabyMonitoringTempsHumidityWebSocket } from "~/features/baby-monitoring/websockets/baby-monitoring-temps-humidity.websocket";
+import { useBabyMonitoringVideoWebSocket } from "~/features/baby-monitoring/websockets/baby-monitoring-video.websocket";
 import { requirehardwareIdMiddleware } from "~/middlewares/require-hardware-id.middleware";
 import { PageLayout } from "~/shared/components/layouts/page-layout";
+import { Image } from "~/shared/components/ui/image";
 import { Separator } from "~/shared/components/ui/separator";
+import { Skeleton } from "~/shared/components/ui/skeleton";
 import { useIsClient } from "~/shared/hooks/use-is-client";
 import { useMediaQuery } from "~/shared/hooks/use-media-query";
 
@@ -24,8 +27,10 @@ const BabyMonitoringPage = () => {
   const { hardwareId } = useLoaderData<typeof loader>();
   const isSmallScreen = useMediaQuery("(max-width: 768px)");
 
-  const { lastJsonMessage } =
+  const { lastJsonMessage: tempsHumidityData } =
     useBabyMonitoringTempsHumidityWebSocket(hardwareId);
+
+  const { imageFrameUrlRef } = useBabyMonitoringVideoWebSocket(hardwareId);
 
   return (
     <PageLayout
@@ -35,20 +40,21 @@ const BabyMonitoringPage = () => {
       backLink={{ name: "Kembali", href: "/" }}
     >
       <div className="flex flex-col md:flex-row gap-6">
-        <video
-          autoPlay
-          muted
-          controls
-          src="/stock.mp4"
-          className="rounded-lg w-full shadow border border-border aspect-video"
-        />
+        {imageFrameUrlRef.current ? (
+          <Image
+            src={imageFrameUrlRef.current}
+            className="rounded-lg w-full shadow border border-border aspect-[4/3]"
+          />
+        ) : (
+          <Skeleton className="rounded-lg w-full shadow border border-border aspect-[4/3]" />
+        )}
 
-        <aside className="basis-full md:basis-56 border border-border bg-card shadow rounded-lg flex flex-col sm:flex-row md:flex-col justify-between">
+        <aside className="basis-full md:basis-64 border border-border bg-card shadow rounded-lg flex flex-col sm:flex-row md:flex-col justify-between">
           <NumberStatsWithIcon
             classNames={{ wrapper: "grow" }}
             icon={ThermometerSunIcon}
             title="Suhu Celcius"
-            value={`${lastJsonMessage?.tempCelcius ?? "-"}°C`}
+            value={`${tempsHumidityData?.temp_celcius ?? "-"}°C`}
           />
 
           <Separator orientation={isSmallScreen ? "vertical" : "horizontal"} />
@@ -57,7 +63,7 @@ const BabyMonitoringPage = () => {
             classNames={{ wrapper: "grow" }}
             icon={ThermometerSunIcon}
             title="Suhu Farenheit"
-            value={`${lastJsonMessage?.tempFarenheit ?? "-"}°F`}
+            value={`${tempsHumidityData?.temp_farenheit ?? "-"}°F`}
           />
 
           <Separator orientation={isSmallScreen ? "vertical" : "horizontal"} />
@@ -66,7 +72,7 @@ const BabyMonitoringPage = () => {
             classNames={{ wrapper: "grow" }}
             icon={DropletsIcon}
             title="Kelembapan"
-            value={`${lastJsonMessage?.humidity ?? "-"}%`}
+            value={`${tempsHumidityData?.humidity ?? "-"}%`}
           />
         </aside>
       </div>
