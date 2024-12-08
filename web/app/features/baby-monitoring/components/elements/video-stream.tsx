@@ -1,3 +1,4 @@
+// TODO: handle streaming cleanup
 import * as React from "react";
 import { Image } from "~/shared/components/ui/image";
 import {
