@@ -29,6 +29,7 @@ db.sqlite3
 media/
 staticfiles/
 *video_frame.jpeg
+*audio_chunk.wav
 
 # Django migrations
 **/migrations/*

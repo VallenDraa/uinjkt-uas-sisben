@@ -5,6 +5,25 @@ import aiofiles
 from PIL import Image, UnidentifiedImageError
 
 
+async def read_frame(file_path):
+    async with aiofiles.open(file_path, "rb") as file:
+        return await file.read()
+
+
+async def send_frame(frame_data):
+    return b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + frame_data + b"\r\n"
+
+
+async def get_fallback_frame(last_valid_frame, hardware_id, placeholder_path):
+    if last_valid_frame.get(hardware_id):
+        with Image.open(BytesIO(last_valid_frame.get(hardware_id))) as img:
+            img.verify()
+            return await send_frame(last_valid_frame[hardware_id])
+
+    else:
+        return await send_frame(await read_frame(placeholder_path))
+
+
 async def generate_video_frames(
     video_frame_path: str,
     placeholder_path: str,
@@ -16,70 +35,29 @@ async def generate_video_frames(
     while True:
         try:
             if os.path.exists(video_frame_path):
-                # Read the frame
-                async with aiofiles.open(video_frame_path, "rb") as frame:
-                    frame_data = await frame.read()
+                frame_data = await read_frame(video_frame_path)
 
-                # Validate the image using Pillow
                 try:
                     with Image.open(BytesIO(frame_data)) as img:
-                        img.verify()  # Validate the file
-
-                        # Update the last valid frame
+                        img.verify()
                         last_valid_frame[hardware_id] = frame_data
+                        yield await send_frame(frame_data)
 
-                        # Send the valid frame
-                        yield (
-                            b"--frame\r\n"
-                            b"Content-Type: image/jpeg\r\n\r\n" + frame_data + b"\r\n"
-                        )
                 except (UnidentifiedImageError, OSError) as e:
-                    if last_valid_frame[hardware_id]:
-                        yield (
-                            b"--frame\r\n"
-                            b"Content-Type: image/jpeg\r\n\r\n"
-                            + last_valid_frame[hardware_id]
-                            + b"\r\n"
-                        )
-                    else:
-                        async with aiofiles.open(placeholder_path, "rb") as placeholder:
-                            yield (
-                                b"--frame\r\n"
-                                b"Content-Type: image/jpeg\r\n\r\n"
-                                + await placeholder.read()
-                                + b"\r\n"
-                            )
-            else:
-                if last_valid_frame[hardware_id]:
-                    yield (
-                        b"--frame\r\n"
-                        b"Content-Type: image/jpeg\r\n\r\n"
-                        + last_valid_frame[hardware_id]
-                        + b"\r\n"
+                    print(f"Invalid frame, using last valid frame as fallback: {e}")
+                    yield await get_fallback_frame(
+                        last_valid_frame, hardware_id, placeholder_path
                     )
-                else:
-                    async with aiofiles.open(placeholder_path, "rb") as placeholder:
-                        yield (
-                            b"--frame\r\n"
-                            b"Content-Type: image/jpeg\r\n\r\n"
-                            + await placeholder.read()
-                            + b"\r\n"
-                        )
-        except (IOError, OSError) as e:
-            if last_valid_frame[hardware_id]:
-                yield (
-                    b"--frame\r\n"
-                    b"Content-Type: image/jpeg\r\n\r\n"
-                    + last_valid_frame[hardware_id]
-                    + b"\r\n"
+
+            else:
+                yield await get_fallback_frame(
+                    last_valid_frame, hardware_id, placeholder_path
                 )
-            else:
-                async with aiofiles.open(placeholder_path, "rb") as placeholder:
-                    yield (
-                        b"--frame\r\n"
-                        b"Content-Type: image/jpeg\r\n\r\n"
-                        + await placeholder.read()
-                        + b"\r\n"
-                    )
+
+        except (IOError, OSError) as e:
+            print(f"Failed to read frame, using last valid frame as fallback: {e}")
+            yield await get_fallback_frame(
+                last_valid_frame, hardware_id, placeholder_path
+            )
 
         await asyncio.sleep(1 / frame_rate)
