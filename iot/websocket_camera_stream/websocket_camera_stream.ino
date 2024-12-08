@@ -93,7 +93,7 @@ esp_err_t init_camera()
   config.pixel_format = PIXFORMAT_JPEG;
 
   // parameters for image quality and size
-  config.frame_size = FRAMESIZE_SVGA; // FRAMESIZE_ + QVGA|CIF|VGA|SVGA|XGA|SXGA|UXGA
+  config.frame_size = FRAMESIZE_VGA; // FRAMESIZE_ + QVGA|CIF|VGA|SVGA|XGA|SXGA|UXGA
   config.jpeg_quality = 10;          // 10-63 lower number means higher quality
   config.fb_count = 2;
   config.grab_mode = CAMERA_GRAB_LATEST;
@@ -109,7 +109,7 @@ esp_err_t init_camera()
   sensor_t *s = esp_camera_sensor_get();
   s->set_framesize(s, FRAMESIZE_VGA);
   s->set_vflip(s, 1);        // flip it back
-  s->set_brightness(s, 1);   // up the brightness just a bit
+  s->set_brightness(s, 0.5);   // up the brightness just a bit
 
   Serial.println("camera init OK");
   return ESP_OK;
@@ -180,13 +180,9 @@ void loop()
     last_temp_sent_millis = current_millis;
   }
 
-  // Send camera data in a throttled manner
-  static unsigned long lastImageSent = 0;
-  if (current_millis - lastImageSent >= 750)
-  {
-    send_video_stream();
-    lastImageSent = current_millis;
-  }
+  
+  send_video_stream();
 
   temps_humidity_ws_client.poll();
+  video_ws_client.poll();
 }

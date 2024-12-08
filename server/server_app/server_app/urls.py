@@ -20,6 +20,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
+    path("api/", include("baby_monitoring.urls")),
     path("api/", include("baby_notification.urls")),
     path("api/", include("monitor_hardware.urls")),
     path("api/", include("baby_schedule.urls")),

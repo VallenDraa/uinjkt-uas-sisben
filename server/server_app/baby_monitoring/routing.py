@@ -5,7 +5,7 @@ websocket_urlpatterns = [
     re_path(
         r"ws/baby-monitoring/video/(?P<hardware_id>\w+)/$",
         BabyMonitoringVideoConsumer.as_asgi(),
-        name="baby-monitoring-video",
+        name="baby-monitoring-video-receive",
     ),
     re_path(
         r"^ws/baby-monitoring/temps-humidity/(?P<hardware_id>[\w\-]+)/$",

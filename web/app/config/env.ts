@@ -4,7 +4,7 @@ declare global {
   }
 }
 
-export const getEnv = (key: string) => {
+export const getEnv = (key: "API_URL" | "WS_URL" | "SESSION_SECRET") => {
   const value =
     typeof process !== "undefined"
       ? process.env?.[key]
