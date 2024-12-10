@@ -56,7 +56,7 @@ export const VideoStream = ({ hardwareId }: VideoStreamProps) => {
         <track kind="captions" />
       </audio>
 
-      <div className="absolute bottom-2 bg-background/20 backdrop-blur -translate-x-1/2 left-1/2 rounded-full py-2 px-10 border border-border/10 shadow transition-opacity opacity-0 duration-300 group-hover:opacity-100 group-has-[:focus]:opacity-100 flex flex-col justify-center gap-3.5">
+      <div className="absolute bottom-2 bg-background/20 backdrop-blur -translate-x-1/2 left-1/2 rounded-full py-4 px-10 border border-border/10 shadow transition-opacity opacity-0 duration-300 group-hover:opacity-100 group-has-[:focus]:opacity-100 flex flex-col justify-center gap-3.5">
         <Slider
           defaultValue={[100]}
           step={1}
@@ -76,9 +76,9 @@ export const VideoStream = ({ hardwareId }: VideoStreamProps) => {
                   onClick={toggleVideoPlaying}
                 >
                   {isVideoPlaying ? (
-                    <PauseIcon className="size-5" />
+                    <PauseIcon className="size-10" />
                   ) : (
-                    <PlayIcon className="size-5" />
+                    <PlayIcon className="size-10" />
                   )}
                 </Button>
               </TooltipTrigger>
@@ -104,9 +104,9 @@ export const VideoStream = ({ hardwareId }: VideoStreamProps) => {
                   onClick={toggleAudioPlaying}
                 >
                   {isAudioPlaying ? (
-                    <Volume2Icon className="size-5" />
+                    <Volume2Icon className="size-10" />
                   ) : (
-                    <VolumeXIcon className="size-5" />
+                    <VolumeXIcon className="size-10" />
                   )}
                 </Button>
               </TooltipTrigger>

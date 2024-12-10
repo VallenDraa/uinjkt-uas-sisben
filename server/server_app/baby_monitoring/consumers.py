@@ -5,6 +5,13 @@ from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
 from io import BytesIO
 from PIL import Image
+from django.core.files.images import ImageFile
+from baby_monitoring.ai.emotion_recognition.emotion_recognition import predict_emotion
+import numpy as np
+from baby_notification.models import BabyNotificationModel
+from monitor_hardware.models import MonitorHardwareModel
+
+shared_state = {}
 
 
 class BabyMonitoringVideoConsumer(WebsocketConsumer):
@@ -26,16 +33,34 @@ class BabyMonitoringVideoConsumer(WebsocketConsumer):
     def receive(self, bytes_data=None):
         if bytes_data:
             try:
+                # Save the image
                 image = Image.open(BytesIO(bytes_data))
-
                 IMAGES_DIR = Path("./baby_monitoring/images")
                 IMAGES_DIR.mkdir(exist_ok=True)
-
                 image_path = IMAGES_DIR / f"{self.hardware_id}_video_frame.jpeg"
                 image.save(image_path, format="JPEG")
 
-                self.send(text_data=json.dumps({"message": "Video image received."}))
+                frame = np.array(image)
+                predicted_emotion = predict_emotion(frame)
 
+                if predicted_emotion:
+                    temps_humidity = shared_state.get(self.hardware_id, {})
+                    monitor_hardware = MonitorHardwareModel.objects.get(
+                        id=self.hardware_id
+                    )
+
+                    with open(image_path, "rb") as img_file:
+                        BabyNotificationModel.objects.create(
+                            hardware_id=monitor_hardware,
+                            title=predicted_emotion,
+                            picture=ImageFile(img_file, name=image_path.name),
+                            temp_celcius=temps_humidity.get("temp_celcius", 0),
+                            temp_farenheit=temps_humidity.get("temp_farenheit", 0),
+                            humidity=temps_humidity.get("humidity", 0),
+                            clarification=f"Emotion detected: {predicted_emotion}",
+                        )
+
+                self.send(text_data=json.dumps({"message": "Video image received."}))
             except Exception as e:
                 print(f"Failed to process image: {e}")
                 self.send(text_data=json.dumps({"error": "Failed to process image."}))
@@ -64,6 +89,13 @@ class BabyMonitoringTempsHumidityConsumer(WebsocketConsumer):
     def receive(self, text_data=None):
         data = json.loads(text_data)
 
+        # Update shared state
+        shared_state[self.hardware_id] = {
+            "temp_celcius": data["temp_celcius"],
+            "temp_farenheit": data["temp_farenheit"],
+            "humidity": data["humidity"],
+        }
+
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
             {
@@ -89,6 +121,8 @@ class BabyMonitoringTempsHumidityConsumer(WebsocketConsumer):
             )
 
     def disconnect(self, code):
+        shared_state.pop(self.hardware_id, None)
+
         # Remove the client from the group
         async_to_sync(self.channel_layer.group_discard)(
             self.room_group_name, self.channel_name
