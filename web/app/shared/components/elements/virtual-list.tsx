@@ -67,41 +67,36 @@ export const VirtualList = <TItem,>({
   });
 
   return (
-    <ScrollArea>
-      <div
-        className={cn("overflow-y-auto", classNames?.wrapper)}
-        ref={parentRef}
+    <ScrollArea ref={parentRef} className={cn(classNames?.wrapper)}>
+      <ul
+        {...props}
+        className={cn(classNames?.list, "w-full relative")}
+        style={{ ...style, height: `${itemVirtualizer.getTotalSize()}px` }}
       >
-        <ul
-          {...props}
-          className={cn(classNames?.list, "w-full relative")}
-          style={{ ...style, height: `${itemVirtualizer.getTotalSize()}px` }}
-        >
-          {itemVirtualizer.getVirtualItems().map(virtualItem => {
-            const isIntersector = virtualItem.index > items.length - 1;
-            const item = items[virtualItem.index];
+        {itemVirtualizer.getVirtualItems().map(virtualItem => {
+          const isIntersector = virtualItem.index > items.length - 1;
+          const item = items[virtualItem.index];
 
-            return isIntersector ? (
-              <VirtualListItem
-                ref={intersectorRef}
-                key={virtualItem.key}
-                className={cn(classNames?.itemSkeletonWrapper)}
-                virtualOptions={virtualItem}
-              >
-                <Skeleton className="h-full w-full" />
-              </VirtualListItem>
-            ) : (
-              <VirtualListItem
-                key={virtualItem.key}
-                className={cn(classNames?.item)}
-                virtualOptions={virtualItem}
-              >
-                <Children item={item} items={items} virtualItem={virtualItem} />
-              </VirtualListItem>
-            );
-          })}
-        </ul>
-      </div>
+          return isIntersector ? (
+            <VirtualListItem
+              ref={intersectorRef}
+              key={virtualItem.key}
+              className={cn(classNames?.itemSkeletonWrapper)}
+              virtualOptions={virtualItem}
+            >
+              <Skeleton className="h-full w-full" />
+            </VirtualListItem>
+          ) : (
+            <VirtualListItem
+              key={virtualItem.key}
+              className={cn(classNames?.item)}
+              virtualOptions={virtualItem}
+            >
+              <Children item={item} items={items} virtualItem={virtualItem} />
+            </VirtualListItem>
+          );
+        })}
+      </ul>
     </ScrollArea>
   );
 };

@@ -67,7 +67,11 @@ const BabyNotificationsPage = () => {
 
   const flatItems = React.useMemo(
     () => ({
-      count: babyNotificationsQuery.data?.pages.at(-1)?.count ?? 0,
+      count:
+        babyNotificationsQuery.data?.pages.reduce(
+          (prev, item) => prev + item.results.length,
+          0,
+        ) ?? 0,
       items:
         babyNotificationsQuery.data?.pages.flatMap(item => item.results) ?? [],
     }),
@@ -90,7 +94,10 @@ const BabyNotificationsPage = () => {
     <PageLayout
       title="Notifikasi Bayi"
       backLink={{ name: "Kembali", href: "/" }}
-      classNames={{ main: "grow flex flex-col" }}
+      classNames={{
+        wrapper: "h-screen",
+        main: "grow flex flex-col overflow-hidden",
+      }}
     >
       <DataFilters
         classNames={{ wrapper: "mb-6" }}
@@ -114,10 +121,7 @@ const BabyNotificationsPage = () => {
           {flatItems.items.length > 0 && !babyNotificationsQuery.isLoading && (
             <VirtualList
               items={flatItems.items || []}
-              classNames={{
-                wrapper: "grow animate-in fade-in",
-                item: "flex",
-              }}
+              classNames={{ wrapper: "animate-in fade-in grow", item: "flex" }}
               intersectionObserverOptions={{ onChange: handleFetchNextPage }}
               virtualOptions={{
                 count: babyNotificationsQuery.hasNextPage
