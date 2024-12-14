@@ -15,6 +15,7 @@ import { Toaster } from "./shared/components/elements/sonner";
 import { queryConfig } from "./lib/react-query";
 import { envLoader } from "./config/env";
 import { ErrorLayout } from "./shared/components/layouts/error-layout";
+import { useNotifications } from "./shared/hooks/use-notification";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -60,6 +61,8 @@ export default function App() {
   const [queryClient] = React.useState(
     () => new QueryClient({ defaultOptions: queryConfig }),
   );
+
+  useNotifications();
 
   return (
     <QueryClientProvider client={queryClient}>

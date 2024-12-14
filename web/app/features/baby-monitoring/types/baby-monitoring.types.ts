@@ -3,3 +3,7 @@ export type BabyMonitoringTempsHumidity = {
   temp_farenheit: number;
   humidity: number;
 };
+
+export type BabyMonitoringNotification = {
+  message: string;
+};

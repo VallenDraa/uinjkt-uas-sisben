@@ -25,8 +25,7 @@ const BabyMonitoringPage = () => {
   const { hardwareId } = useLoaderData<typeof loader>();
   const isSmallScreen = useMediaQuery("(max-width: 768px)");
 
-  const { lastJsonMessage: tempsHumidityData } =
-    useBabyMonitoringTempsHumidityWebSocket(hardwareId);
+  const { tempsHumidity } = useBabyMonitoringTempsHumidityWebSocket(hardwareId);
 
   return (
     <PageLayout
@@ -38,12 +37,12 @@ const BabyMonitoringPage = () => {
       <div className="flex flex-col lg:flex-row gap-6">
         <VideoStream hardwareId={hardwareId} />
 
-        <aside className="basis-full lg:basis-64 border border-border bg-card shadow rounded-lg flex flex-col sm:flex-row md:flex-col justify-between">
+        <aside className="basis-full lg:basis-72 border border-border bg-card shadow rounded-lg flex flex-col sm:flex-row md:flex-col justify-between">
           <NumberStatsWithIcon
             classNames={{ wrapper: "grow" }}
             icon={ThermometerSunIcon}
             title="Suhu Celcius"
-            value={`${tempsHumidityData?.temp_celcius ?? "-"}°C`}
+            value={`${tempsHumidity?.temp_celcius ?? "-"}°C`}
           />
 
           <Separator orientation={isSmallScreen ? "vertical" : "horizontal"} />
@@ -52,7 +51,7 @@ const BabyMonitoringPage = () => {
             classNames={{ wrapper: "grow" }}
             icon={ThermometerSunIcon}
             title="Suhu Farenheit"
-            value={`${tempsHumidityData?.temp_farenheit ?? "-"}°F`}
+            value={`${tempsHumidity?.temp_farenheit ?? "-"}°F`}
           />
 
           <Separator orientation={isSmallScreen ? "vertical" : "horizontal"} />
@@ -61,7 +60,7 @@ const BabyMonitoringPage = () => {
             classNames={{ wrapper: "grow" }}
             icon={DropletsIcon}
             title="Kelembapan"
-            value={`${tempsHumidityData?.humidity ?? "-"}%`}
+            value={`${tempsHumidity?.humidity ?? "-"}%`}
           />
         </aside>
       </div>

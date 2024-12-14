@@ -1,7 +1,5 @@
 import * as React from "react";
-
-export const useIsomorphicLayoutEffect =
-  typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect;
+import { useIsomorphicLayoutEffect } from "./use-isomorphic-layout-effect";
 
 type UseMediaQueryOptions = {
   defaultValue?: boolean;

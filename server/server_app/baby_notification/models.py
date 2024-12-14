@@ -3,19 +3,13 @@ from django.db import models
 
 
 class BabyNotificationModel(models.Model):
-    class NotificationTitle(models.TextChoices):
-        CRYING = "crying", "Crying"
-        DISCOMFORT = "discomfort", "Discomfort"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
 
     hardware_id = models.ForeignKey(
         "monitor_hardware.MonitorHardwareModel", on_delete=models.CASCADE
     )
-    title = models.CharField(
-        max_length=255,
-        choices=NotificationTitle.choices,
-    )
+    title = models.CharField(max_length=255)
     picture = models.ImageField(upload_to="baby_pictures/")
     temp_celcius = models.FloatField(default=0)
     temp_farenheit = models.FloatField(default=0)

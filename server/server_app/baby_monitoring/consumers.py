@@ -10,6 +10,8 @@ from baby_monitoring.ai.emotion_recognition.emotion_recognition import predict_e
 import numpy as np
 from baby_notification.models import BabyNotificationModel
 from monitor_hardware.models import MonitorHardwareModel
+import struct
+
 
 shared_state = {}
 
@@ -50,7 +52,7 @@ class BabyMonitoringVideoConsumer(WebsocketConsumer):
                     )
 
                     with open(image_path, "rb") as img_file:
-                        BabyNotificationModel.objects.create(
+                        notification = BabyNotificationModel.objects.create(
                             hardware_id=monitor_hardware,
                             title=predicted_emotion,
                             picture=ImageFile(img_file, name=image_path.name),
@@ -60,10 +62,30 @@ class BabyMonitoringVideoConsumer(WebsocketConsumer):
                             clarification=f"Emotion detected: {predicted_emotion}",
                         )
 
+                        async_to_sync(self.channel_layer.group_send)(
+                            self.room_group_name,
+                            {
+                                "type": "emotion.message",
+                                "sender_channel_name": self.channel_name,
+                                "emotion": predicted_emotion,
+                                "time": notification.created_at.strftime(),
+                            },
+                        )
+
                 self.send(text_data=json.dumps({"message": "Video image received."}))
             except Exception as e:
                 print(f"Failed to process image: {e}")
                 self.send(text_data=json.dumps({"error": "Failed to process image."}))
+
+    def emotion_message(self, event):
+        if event["sender_channel_name"] != self.channel_name:
+            self.send(
+                text_data=json.dumps(
+                    {
+                        "message": f"Emotion detected: {event['emotion']} at {event['time']}",
+                    }
+                )
+            )
 
     def disconnect(self, code):
         async_to_sync(self.channel_layer.group_discard)(
@@ -110,9 +132,20 @@ class BabyMonitoringTempsHumidityConsumer(WebsocketConsumer):
     def temps_humidity_message(self, event):
         # Exclude the sender from receiving their own broadcast
         if event["sender_channel_name"] != self.channel_name:
+            message = ""
+
+            is_too_humid = event["humidity"] > 70
+            is_too_hot = event["temp_celcius"] > 30 and event["temp_farenheit"] > 86
+
+            if is_too_humid:
+                message += "\nTerlalu lembab, tingkat kelembaban yang baik bagi bayi adalah dibawah 70%."
+            if is_too_hot:
+                message += "\nTerlalu panas, suhu yang baik bagi bayi adalah dibawah 30°C atau 86°F."
+
             self.send(
                 text_data=json.dumps(
                     {
+                        "message": (None if message == "" else message),
                         "temp_celcius": event["temp_celcius"],
                         "temp_farenheit": event["temp_farenheit"],
                         "humidity": event["humidity"],
@@ -148,15 +181,30 @@ class BabyMonitoringAudioConsumer(WebsocketConsumer):
 
         self.audio_file.setnchannels(1)  # Mono audio
         self.audio_file.setsampwidth(2)  # 16-bit audio
-        self.audio_file.setframerate(16000)  # Sampling rate
+        self.audio_file.setframerate(44100)  # Sampling rate
 
     def websocket_receive(self, message):
         if "bytes" in message and message["bytes"]:
             self.receive(bytes_data=message["bytes"])
 
+    def swap_endian(self, data):
+        """Swap endianness of 16-bit PCM data."""
+        swapped = b"".join(
+            struct.pack("<H", struct.unpack(">H", data[i : i + 2])[0])
+            for i in range(0, len(data), 2)
+        )
+        return swapped
+
     def receive(self, bytes_data=None):
         if bytes_data:
             try:
+                # Debugging: Log size and a snippet of data
+                # print(f"Received audio chunk: {len(bytes_data)} bytes")
+                # print(f"Snippet of received data: {bytes_data[:10]}")
+
+                # Optional: Swap endian if needed (uncomment if necessary)
+                bytes_data = self.swap_endian(bytes_data)
+
                 # Write raw PCM data to WAV file
                 self.audio_file.writeframes(bytes_data)
 

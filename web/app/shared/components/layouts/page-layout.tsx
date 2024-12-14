@@ -6,6 +6,7 @@ import { Link } from "@remix-run/react";
 import { buttonVariants } from "../ui/button";
 import { MoveLeftIcon } from "lucide-react";
 import { Separator } from "../ui/separator";
+import { useNotifications } from "~/shared/hooks/use-notification";
 
 export type PageLayoutProps = Omit<
   React.HTMLAttributes<HTMLDivElement>,
@@ -39,6 +40,8 @@ export const PageLayout = ({
   backLink,
   ...props
 }: PageLayoutProps) => {
+  useNotifications();
+
   return (
     <div
       {...props}
@@ -55,37 +58,37 @@ export const PageLayout = ({
         )}
       />
 
-      <header
-        className={cn("pt-10 space-y-6 relative z-10 px-4", classNames?.header)}
-      >
-        {backLink && (
-          <Link
-            aria-disabled={backLink?.disabled}
-            className={cn(
-              buttonVariants({ variant: "link", size: "lg" }),
-              "px-0",
-              backLink?.disabled && "pointer-events-none",
-              backLink.className,
-            )}
-            to={backLink?.disabled ? "#" : backLink.href}
-          >
-            <MoveLeftIcon className="size-4 mr-2" />
-            {backLink.name}
-          </Link>
-        )}
-
-        {showDateTime && <CurrentDateTime />}
-
-        <div className="space-y-2">
-          <Typography variant="h2" tag="h1">
-            {title}
-          </Typography>
-
-          {description && (
-            <Typography variant="lead" tag="p">
-              {description}
-            </Typography>
+      <header className={cn("pt-10 relative z-10 px-4", classNames?.header)}>
+        <div className="space-y-6">
+          {backLink && (
+            <Link
+              aria-disabled={backLink?.disabled}
+              className={cn(
+                buttonVariants({ variant: "link", size: "lg" }),
+                "px-0",
+                backLink?.disabled && "pointer-events-none",
+                backLink.className,
+              )}
+              to={backLink?.disabled ? "#" : backLink.href}
+            >
+              <MoveLeftIcon className="size-4 mr-2" />
+              {backLink.name}
+            </Link>
           )}
+
+          {showDateTime && <CurrentDateTime />}
+
+          <div className="space-y-2">
+            <Typography variant="h2" tag="h1">
+              {title}
+            </Typography>
+
+            {description && (
+              <Typography variant="lead" tag="p">
+                {description}
+              </Typography>
+            )}
+          </div>
         </div>
       </header>
 
