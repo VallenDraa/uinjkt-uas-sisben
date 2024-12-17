@@ -3,10 +3,8 @@ from django.core.serializers.json import DjangoJSONEncoder
 from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-
 from baby_notification.models import BabyNotificationModel
 from monitor_hardware.models import MonitorHardwareModel
-from baby_notification.filters import BabyNotificationFilter
 from .utils.organize_schedules_parts_of_day import organize_schedules_parts_of_day
 from .filters import BabyScheduleFilter
 from .serializers import OrganizedSchedulesSerializer
@@ -113,6 +111,24 @@ class BabyScheduleViewSet(viewsets.ViewSet):
         if len(notifications_data) is 0:
             response_data = OrganizedSchedulesSerializer([], many=True).data
             return Response(response_data)
+
+        if len(notifications_data) > 100:
+            return Response(
+                {"error": "Too many notifications to process."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        is_all_clarifications_empty = True
+        for notification in notifications_data:
+            if notification["clarifications"]:
+                is_all_clarifications_empty = False
+                break
+
+        if is_all_clarifications_empty:
+            return Response(
+                {"error": "All clarifications are empty."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         new_schedules = generate_schedules(
             client, json.dumps(notifications_data, cls=DjangoJSONEncoder)

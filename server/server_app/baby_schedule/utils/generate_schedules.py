@@ -8,6 +8,8 @@ client = Mistral(api_key=os.environ.get("LLM_API_KEY"))
 
 
 def generate_schedules(client: Mistral, serialized_notifications: str):
+    if not serialized_notifications:
+        return []
 
     chat_response = client.chat.complete(
         model="mistral-large-latest",
@@ -24,12 +26,12 @@ def generate_schedules(client: Mistral, serialized_notifications: str):
                     Dari json tersebut saya mau kamu untuk membuat sebuah schedule perharinya. Schedulenya berupa
                     hal yang kira-kira sangatlah esensial bagi bayinya, sehingga dirasa harus dilakukan oleh orang tua
                     secara rutin. Untuk jam pada schedulenya harus ada jam pagi, siang, sore, 
-                    dan malam. Saya mau nilai balikannya juga berupa json dan HANYA jsonnya saja! 
+                    dan malam. Abaikan notifikasi yang berhubungan dengan suhu dan kelembapan jika ruangan.    
                     
-                    Untuk format jsonnya adalah sebagai berikut: 
+                    Saya mau nilai balikannya juga berupa json dan HANYA jsonnya saja, Untuk format jsonnya adalah sebagai berikut: 
                     {'''{ "title": <string>, "description": <string>, "time": <YYYY-MM-DD'T'hh:mm:ss'Z'>}'''}
                     
-                    Ingat saya mau nilai balikannya hanya json.
+                    disini time itu harus dalam format ISO 8601. Ingat saya mau nilai balikannya hanya json.
                 """,
             },
         ],
@@ -37,7 +39,6 @@ def generate_schedules(client: Mistral, serialized_notifications: str):
     )
 
     schedules: list = json.loads(chat_response.choices[0].message.content)
-    print("🚀 ~ schedules:", schedules)
 
     # Process time strings
     for schedule in schedules:

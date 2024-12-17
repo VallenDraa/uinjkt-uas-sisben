@@ -16,7 +16,7 @@ export const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       richColors
       closeButton
-      position="bottom-center"
+      position="top-right"
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
       toastOptions={{

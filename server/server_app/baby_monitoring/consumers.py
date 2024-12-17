@@ -59,7 +59,6 @@ class BabyMonitoringVideoConsumer(WebsocketConsumer):
                             temp_celcius=temps_humidity.get("temp_celcius", 0),
                             temp_farenheit=temps_humidity.get("temp_farenheit", 0),
                             humidity=temps_humidity.get("humidity", 0),
-                            clarification=f"Emotion detected: {predicted_emotion}",
                         )
 
                         async_to_sync(self.channel_layer.group_send)(
@@ -181,29 +180,18 @@ class BabyMonitoringAudioConsumer(WebsocketConsumer):
 
         self.audio_file.setnchannels(1)  # Mono audio
         self.audio_file.setsampwidth(2)  # 16-bit audio
-        self.audio_file.setframerate(44100)  # Sampling rate
+        self.audio_file.setframerate(8000)  # Sampling rate
 
     def websocket_receive(self, message):
         if "bytes" in message and message["bytes"]:
             self.receive(bytes_data=message["bytes"])
 
-    def swap_endian(self, data):
-        """Swap endianness of 16-bit PCM data."""
-        swapped = b"".join(
-            struct.pack("<H", struct.unpack(">H", data[i : i + 2])[0])
-            for i in range(0, len(data), 2)
-        )
-        return swapped
-
     def receive(self, bytes_data=None):
         if bytes_data:
             try:
                 # Debugging: Log size and a snippet of data
-                # print(f"Received audio chunk: {len(bytes_data)} bytes")
-                # print(f"Snippet of received data: {bytes_data[:10]}")
-
-                # Optional: Swap endian if needed (uncomment if necessary)
-                bytes_data = self.swap_endian(bytes_data)
+                print(f"Received audio chunk: {len(bytes_data)} bytes")
+                print(f"Snippet of received data: {bytes_data[:10]}")
 
                 # Write raw PCM data to WAV file
                 self.audio_file.writeframes(bytes_data)
