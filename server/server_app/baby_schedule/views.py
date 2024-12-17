@@ -118,15 +118,18 @@ class BabyScheduleViewSet(viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        is_all_clarifications_empty = True
+        is_all_clarification_empty = True
         for notification in notifications_data:
-            if notification["clarifications"]:
-                is_all_clarifications_empty = False
+            if (
+                notification["clarification"] != None
+                and len(notification["clarification"]) > 0
+            ):
+                is_all_clarification_empty = False
                 break
 
-        if is_all_clarifications_empty:
+        if is_all_clarification_empty:
             return Response(
-                {"error": "All clarifications are empty."},
+                {"error": "All clarification are empty."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

@@ -2,7 +2,7 @@ from pathlib import Path
 from django.http import StreamingHttpResponse
 from django.views import View
 
-from .utils.read_audio_chunks import read_audio_chunks
+from .utils.audio_chunks import read_audio_chunks
 from .utils.generate_video_frames import generate_video_frames
 
 
@@ -29,7 +29,12 @@ class AudioStreamView(View):
     def get(self, request, hardware_id):
         audio_path = self.audio_dir / f"{hardware_id}_audio_chunk.wav"
 
-        return StreamingHttpResponse(
+        response = StreamingHttpResponse(
             read_audio_chunks(audio_path),
             content_type="audio/wav",
         )
+        response["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response["Pragma"] = "no-cache"
+        response["Expires"] = "0"
+
+        return response

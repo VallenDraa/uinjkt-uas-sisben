@@ -1,0 +1,18 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.7.5 Chrome/126.0.6478.183 Electron/31.3.0 Safari/537.36" version="24.7.5">
+  <diagram name="Page-1" id="lcoXLcqIo6e9TU4etfuI">
+    <mxGraphModel dx="289" dy="133" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <UserObject label="&lt;b style=&quot;font-weight:normal;&quot; id=&quot;docs-internal-guid-b76e16a1-7fff-9e69-81b5-06a896a6bba8&quot;&gt;&lt;span style=&quot;font-size:12pt;font-family:&#39;Times New Roman&#39;,serif;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;&quot;&gt;&lt;span style=&quot;border:none;display:inline-block;overflow:hidden;width:286px;height:161px;&quot;&gt;&lt;img src=&quot;https://lh7-rt.googleusercontent.com/docsz/AD_4nXfK0VYgZDWmbNdXtOCQlRUQSc48NEmfTHc4hndtIJRgrOaEDdZhkQQD3ZPdJTKz8rLiYBc6x3otPXpUF-zXGNxUrz6tjm7_84X3pnodJudvxjkF6Jw-yf3uw87_ubkmHSs6SN5m?key=EltDjJ6_xlSCGTeuLNktxmrT&quot; width=&quot;286&quot; height=&quot;161&quot; style=&quot;margin-left:0px;margin-top:0px;&quot;&gt;&lt;/span&gt;&lt;/span&gt;&lt;/b&gt;" link="&lt;b style=&quot;font-weight:normal;&quot; id=&quot;docs-internal-guid-b76e16a1-7fff-9e69-81b5-06a896a6bba8&quot;&gt;&lt;span style=&quot;font-size:12pt;font-family:&#39;Times New Roman&#39;,serif;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;&quot;&gt;&lt;span style=&quot;border:none;display:inline-block;overflow:hidden;width:286px;height:161px;&quot;&gt;&lt;img src=&quot;https://lh7-rt.googleusercontent.com/docsz/AD_4nXfK0VYgZDWmbNdXtOCQlRUQSc48NEmfTHc4hndtIJRgrOaEDdZhkQQD3ZPdJTKz8rLiYBc6x3otPXpUF-zXGNxUrz6tjm7_84X3pnodJudvxjkF6Jw-yf3uw87_ubkmHSs6SN5m?key=EltDjJ6_xlSCGTeuLNktxmrT&quot; width=&quot;286&quot; height=&quot;161&quot; style=&quot;margin-left:0px;margin-top:0px;&quot;&gt;&lt;/span&gt;&lt;/span&gt;&lt;/b&gt;" id="Fw-aWdMfHV5dJzxvCZXy-1">
+          <mxCell style="text;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+            <mxGeometry x="360" y="200" width="320" height="190" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="Fw-aWdMfHV5dJzxvCZXy-2" value="&lt;font style=&quot;font-size: 36px;&quot;&gt;Server&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="780" y="380" width="250" height="100" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

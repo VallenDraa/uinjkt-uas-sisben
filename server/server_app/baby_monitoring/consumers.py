@@ -1,19 +1,26 @@
 import json
 from pathlib import Path
+import time
 import wave
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
 from io import BytesIO
 from PIL import Image
 from django.core.files.images import ImageFile
-from baby_monitoring.ai.emotion_recognition.emotion_recognition import predict_emotion
-import numpy as np
 from baby_notification.models import BabyNotificationModel
 from monitor_hardware.models import MonitorHardwareModel
-import struct
+from .ai.predict_is_crying import predict_is_crying
+from .ai.predict_is_uncomfortable import predict_is_uncomfortable
 
 
-shared_state = {}
+global_temps_humidity = {}
+
+
+last_uncomfortable_prediction = {}
+last_crying_prediction = {}
+
+UNCOMFORTABLE_PREDICTION_COOLDOWN = 3
+CRYING_PREDICTION_COOLDOWN = 3
 
 
 class BabyMonitoringVideoConsumer(WebsocketConsumer):
@@ -42,51 +49,189 @@ class BabyMonitoringVideoConsumer(WebsocketConsumer):
                 image_path = IMAGES_DIR / f"{self.hardware_id}_video_frame.jpeg"
                 image.save(image_path, format="JPEG")
 
-                frame = np.array(image)
-                predicted_emotion = predict_emotion(frame)
+                temps_humidity = global_temps_humidity.get(self.hardware_id, {})
+                monitor_hardware = MonitorHardwareModel.objects.get(id=self.hardware_id)
 
-                if predicted_emotion:
-                    temps_humidity = shared_state.get(self.hardware_id, {})
-                    monitor_hardware = MonitorHardwareModel.objects.get(
-                        id=self.hardware_id
-                    )
+                # Throttle predict_is_uncomfortable calls
+                current_time = time.time()
+                last_prediction_time = last_uncomfortable_prediction.get(
+                    self.hardware_id, 0
+                )
 
-                    with open(image_path, "rb") as img_file:
-                        notification = BabyNotificationModel.objects.create(
-                            hardware_id=monitor_hardware,
-                            title=predicted_emotion,
-                            picture=ImageFile(img_file, name=image_path.name),
-                            temp_celcius=temps_humidity.get("temp_celcius", 0),
-                            temp_farenheit=temps_humidity.get("temp_farenheit", 0),
-                            humidity=temps_humidity.get("humidity", 0),
+                if (
+                    current_time - last_prediction_time
+                    >= UNCOMFORTABLE_PREDICTION_COOLDOWN
+                ):
+                    is_baby_uncomfortable = predict_is_uncomfortable(image_path)
+                    last_uncomfortable_prediction[self.hardware_id] = current_time
+
+                    if is_baby_uncomfortable:
+                        temps_humidity = global_temps_humidity.get(self.hardware_id, {})
+                        print("🚀 ~ hardware_id 1:", self.hardware_id)
+                        monitor_hardware = MonitorHardwareModel.objects.get(
+                            id=self.hardware_id
                         )
 
-                        async_to_sync(self.channel_layer.group_send)(
-                            self.room_group_name,
-                            {
-                                "type": "emotion.message",
-                                "sender_channel_name": self.channel_name,
-                                "emotion": predicted_emotion,
-                                "time": notification.created_at.strftime(),
-                            },
-                        )
+                        with open(image_path, "rb") as img_file:
+                            notification = BabyNotificationModel.objects.create(
+                                hardware_id=monitor_hardware,
+                                title="Bayi Terlihat Tidak Nyaman!",
+                                picture=ImageFile(img_file, name=image_path.name),
+                                temp_celcius=temps_humidity.get("temp_celcius", 0),
+                                temp_farenheit=temps_humidity.get("temp_farenheit", 0),
+                                humidity=temps_humidity.get("humidity", 0),
+                            )
+
+                            async_to_sync(self.channel_layer.group_send)(
+                                self.room_group_name,
+                                {
+                                    "type": "uncomfortable.message",
+                                    "sender_channel_name": self.channel_name,
+                                    "time": notification.created_at.strftime(
+                                        "%Y-%m-%d %H:%M:%S"
+                                    ),
+                                },
+                            )
+                            img_file.close()
 
                 self.send(text_data=json.dumps({"message": "Video image received."}))
             except Exception as e:
                 print(f"Failed to process image: {e}")
                 self.send(text_data=json.dumps({"error": "Failed to process image."}))
 
-    def emotion_message(self, event):
+    def uncomfortable_message(self, event):
         if event["sender_channel_name"] != self.channel_name:
             self.send(
                 text_data=json.dumps(
                     {
-                        "message": f"Emotion detected: {event['emotion']} at {event['time']}",
+                        "message": f"Bayi terdeksi tidak nyaman pada {event['time']}",
                     }
                 )
             )
 
     def disconnect(self, code):
+        async_to_sync(self.channel_layer.group_discard)(
+            self.room_group_name, self.channel_name
+        )
+
+
+class BabyMonitoringAudioConsumer(WebsocketConsumer):
+    def connect(self):
+        self.hardware_id = self.scope["url_route"]["kwargs"]["hardware_id"]
+        self.room_group_name = f"audio_stream_{self.hardware_id}"
+
+        async_to_sync(self.channel_layer.group_add)(
+            self.room_group_name,
+            self.channel_name,
+        )
+
+        self.accept()
+
+        AUDIO_DIR = Path("./baby_monitoring/audio")
+        AUDIO_DIR.mkdir(exist_ok=True)
+        self.audio_path = AUDIO_DIR / f"{self.hardware_id}_audio_chunk.wav"
+
+        # Initialize audio buffer and metadata
+        self.audio_buffer = b""
+        self.max_duration_frames = 10 * 44100  # 10 seconds in frames
+        self.sample_rate = 44100
+        self.sample_width = 2
+        self.channels = 1
+
+        # Create or reset the WAV file
+        self._reset_audio_file()
+
+    def _reset_audio_file(self):
+        """
+        Creates or overwrites the WAV file with the current buffer.
+        """
+        with wave.open(str(self.audio_path), "wb") as audio_file:
+            audio_file.setnchannels(self.channels)
+            audio_file.setsampwidth(self.sample_width)
+            audio_file.setframerate(self.sample_rate)
+            audio_file.writeframes(self.audio_buffer)
+            audio_file.close()
+
+    def websocket_receive(self, message):
+        if "bytes" in message and message["bytes"]:
+            self.receive(bytes_data=message["bytes"])
+
+    def receive(self, bytes_data=None):
+        if bytes_data:
+            try:
+                # Append new data to the buffer
+                self.audio_buffer += bytes_data
+                frames_in_buffer = len(self.audio_buffer) // (
+                    self.sample_width * self.channels
+                )
+
+                # Trim the buffer to maintain the last 10 seconds
+                if frames_in_buffer > self.max_duration_frames:
+                    bytes_to_keep = (
+                        self.max_duration_frames * self.sample_width * self.channels
+                    )
+                    self.audio_buffer = self.audio_buffer[-bytes_to_keep:]
+
+                # Save the trimmed buffer to the WAV file
+                self._reset_audio_file()
+
+                # Throttle `predict_is_crying` calls
+                current_time = time.time()
+                last_prediction_time = last_crying_prediction.get(self.hardware_id, 0)
+
+                if current_time - last_prediction_time >= CRYING_PREDICTION_COOLDOWN:
+                    is_baby_crying = predict_is_crying(self.audio_path)
+                    last_crying_prediction[self.hardware_id] = current_time
+
+                    if is_baby_crying:
+                        temps_humidity = global_temps_humidity.get(self.hardware_id, {})
+                        monitor_hardware = MonitorHardwareModel.objects.get(
+                            id=self.hardware_id
+                        )
+                        IMAGES_DIR = Path("./baby_monitoring/images")
+                        IMAGES_DIR.mkdir(exist_ok=True)
+                        image_path = IMAGES_DIR / f"{self.hardware_id}_video_frame.jpeg"
+
+                        with open(image_path, "rb") as img_file:
+                            notification = BabyNotificationModel.objects.create(
+                                hardware_id=monitor_hardware,
+                                title="Bayi Terlihat Tidak Nyaman!",
+                                picture=ImageFile(img_file, name=image_path.name),
+                                temp_celcius=temps_humidity.get("temp_celcius", 0),
+                                temp_farenheit=temps_humidity.get("temp_farenheit", 0),
+                                humidity=temps_humidity.get("humidity", 0),
+                            )
+
+                            async_to_sync(self.channel_layer.group_send)(
+                                self.room_group_name,
+                                {
+                                    "type": "crying.message",
+                                    "sender_channel_name": self.channel_name,
+                                    "time": notification.created_at.strftime(
+                                        "%Y-%m-%d %H:%M:%S"
+                                    ),
+                                    "crying_detected": True,
+                                },
+                            )
+                            img_file.close()
+
+                self.send(text_data=json.dumps({"message": "Audio chunk received."}))
+
+            except Exception as e:
+                print(f"Failed to process audio: {e}")
+                self.send(text_data=json.dumps({"error": "Failed to process audio."}))
+
+    def crying_message(self, event):
+        if event["sender_channel_name"] != self.channel_name:
+            self.send(
+                text_data=json.dumps(
+                    {"message": f"Bayi terdeteksi menangis pada {event['time']}"}
+                )
+            )
+
+    def disconnect(self, code):
+        # Close the WAV file
+        self._reset_audio_file()
         async_to_sync(self.channel_layer.group_discard)(
             self.room_group_name, self.channel_name
         )
@@ -111,7 +256,7 @@ class BabyMonitoringTempsHumidityConsumer(WebsocketConsumer):
         data = json.loads(text_data)
 
         # Update shared state
-        shared_state[self.hardware_id] = {
+        global_temps_humidity[self.hardware_id] = {
             "temp_celcius": data["temp_celcius"],
             "temp_farenheit": data["temp_farenheit"],
             "humidity": data["humidity"],
@@ -153,59 +298,9 @@ class BabyMonitoringTempsHumidityConsumer(WebsocketConsumer):
             )
 
     def disconnect(self, code):
-        shared_state.pop(self.hardware_id, None)
+        global_temps_humidity.pop(self.hardware_id, None)
 
         # Remove the client from the group
-        async_to_sync(self.channel_layer.group_discard)(
-            self.room_group_name, self.channel_name
-        )
-
-
-class BabyMonitoringAudioConsumer(WebsocketConsumer):
-    def connect(self):
-        self.hardware_id = self.scope["url_route"]["kwargs"]["hardware_id"]
-        self.room_group_name = f"audio_stream_{self.hardware_id}"
-
-        async_to_sync(self.channel_layer.group_add)(
-            self.room_group_name,
-            self.channel_name,
-        )
-
-        self.accept()
-
-        AUDIO_DIR = Path("./baby_monitoring/audio")
-        AUDIO_DIR.mkdir(exist_ok=True)
-        self.audio_path = AUDIO_DIR / f"{self.hardware_id}_audio_chunk.wav"
-        self.audio_file = wave.open(str(self.audio_path), "wb")
-
-        self.audio_file.setnchannels(1)  # Mono audio
-        self.audio_file.setsampwidth(2)  # 16-bit audio
-        self.audio_file.setframerate(8000)  # Sampling rate
-
-    def websocket_receive(self, message):
-        if "bytes" in message and message["bytes"]:
-            self.receive(bytes_data=message["bytes"])
-
-    def receive(self, bytes_data=None):
-        if bytes_data:
-            try:
-                # Debugging: Log size and a snippet of data
-                print(f"Received audio chunk: {len(bytes_data)} bytes")
-                print(f"Snippet of received data: {bytes_data[:10]}")
-
-                # Write raw PCM data to WAV file
-                self.audio_file.writeframes(bytes_data)
-
-                self.send(text_data=json.dumps({"message": "Audio chunk received."}))
-            except Exception as e:
-                print(f"Failed to process audio: {e}")
-                self.send(text_data=json.dumps({"error": "Failed to process audio."}))
-
-    def disconnect(self, code):
-        # Close the WAV file
-        if self.audio_file:
-            self.audio_file.close()
-
         async_to_sync(self.channel_layer.group_discard)(
             self.room_group_name, self.channel_name
         )

@@ -3,6 +3,7 @@ import { useLoaderData } from "@remix-run/react";
 import { DropletsIcon, ThermometerSunIcon } from "lucide-react";
 import { NumberStatsWithIcon } from "~/features/baby-monitoring/components/elements/number-stats-with-icon";
 import { VideoStream } from "~/features/baby-monitoring/components/elements/video-stream";
+import { useBabyMonitoringAudioWebSocket } from "~/features/baby-monitoring/websockets/baby-monitoring-audio.websocket";
 import { useBabyMonitoringTempsHumidityWebSocket } from "~/features/baby-monitoring/websockets/baby-monitoring-temps-humidity.websocket";
 import { requirehardwareIdMiddleware } from "~/middlewares/require-hardware-id.middleware";
 import { PageLayout } from "~/shared/components/layouts/page-layout";
@@ -25,6 +26,7 @@ const BabyMonitoringPage = () => {
   const { hardwareId } = useLoaderData<typeof loader>();
   const isSmallScreen = useMediaQuery("(max-width: 768px)");
 
+  useBabyMonitoringAudioWebSocket(hardwareId);
   const { tempsHumidity } = useBabyMonitoringTempsHumidityWebSocket(hardwareId);
 
   return (
