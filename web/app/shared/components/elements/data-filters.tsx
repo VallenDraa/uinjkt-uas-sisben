@@ -2,7 +2,7 @@ import * as React from "react";
 import { Input } from "~/shared/components/ui/input";
 import { FilterParameters } from "~/shared/types/api.types";
 import { cn } from "~/shared/utils/shadcn";
-import { DateRangePickerDialog } from "./date-range-picker-dialog";
+import { DateRange, DateRangePickerDialog } from "./date-range-picker-dialog";
 import { formatDateYYYYMMDD } from "~/shared/utils/formatter";
 import { useDebouncedCallback } from "use-debounce";
 
@@ -20,7 +20,13 @@ export const DataFilters = ({
   const currentDate = React.useRef(new Date());
 
   const [innerSearch, setInnerSearch] = React.useState(filters.search ?? "");
-
+  const [innerDateRange, setInnerDateRange] = React.useState<DateRange>(() => {
+    const [from, to] = (filters.created_at__range ?? "").split(",");
+    return {
+      from: from ? new Date(from) : currentDate.current,
+      to: to ? new Date(to) : currentDate.current,
+    };
+  });
   const debouncedSearch = useDebouncedCallback(
     React.useCallback(
       (newSearch: string) => setFilters({ ...filters, search: newSearch }),
@@ -49,13 +55,22 @@ export const DataFilters = ({
           }}
         />
         <DateRangePickerDialog
+          calendarProps={{
+            disabled: { after: new Date() },
+          }}
           onUpdate={({ from, to }) => {
+            setInnerDateRange({ from, to });
             setFilters({
               created_at__range: `${formatDateYYYYMMDD(
                 from,
               )},${formatDateYYYYMMDD(to ?? from)}`,
             });
           }}
+          range={{
+            from: innerDateRange?.from ?? currentDate.current,
+            to: innerDateRange?.to ?? currentDate.current,
+          }}
+          setRange={setInnerDateRange}
           initialDateFrom={formatDateYYYYMMDD(currentDate.current)}
           initialDateTo={formatDateYYYYMMDD(currentDate.current)}
         />
