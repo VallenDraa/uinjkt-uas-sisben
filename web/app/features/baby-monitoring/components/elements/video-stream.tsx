@@ -12,12 +12,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/shared/components/ui/tooltip";
-import {
-  PauseIcon,
-  PlayIcon,
-  // Volume2Icon, VolumeXIcon
-} from "lucide-react";
-// import { Slider } from "~/shared/components/ui/slider";
+import { PauseIcon, PlayIcon, Volume2Icon, VolumeXIcon } from "lucide-react";
+import { Slider } from "~/shared/components/ui/slider";
 
 export type VideoStreamProps = {
   hardwareId: string;
@@ -28,6 +24,24 @@ export const VideoStream = ({ hardwareId }: VideoStreamProps) => {
 
   const [isVideoPlaying, setIsVideoPlaying] = React.useState(true);
   const toggleVideoPlaying = () => setIsVideoPlaying(prev => !prev);
+
+  const [isAudioPlaying, setIsAudioPlaying] = React.useState(false);
+  const toggleAudioPlaying = () => {
+    if (audioRef.current) {
+      if (isAudioPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+
+      setIsAudioPlaying(prev => !prev);
+    }
+  };
+  const changeAudioVolume = (sliderValues: number[]) => {
+    if (audioRef.current) {
+      audioRef.current.volume = sliderValues[0] / 100;
+    }
+  };
 
   return (
     <div className="rounded-lg w-full shadow border border-border aspect-[4/3] overflow-clip relative group">
@@ -43,6 +57,14 @@ export const VideoStream = ({ hardwareId }: VideoStreamProps) => {
       </audio>
 
       <div className="absolute bottom-2 bg-background/20 backdrop-blur -translate-x-1/2 left-1/2 rounded-full py-4 px-10 border border-border/10 shadow transition-opacity opacity-0 duration-300 group-hover:opacity-100 group-has-[:focus]:opacity-100 flex flex-col justify-center gap-3.5">
+        <Slider
+          defaultValue={[100]}
+          step={1}
+          max={100}
+          className="w-full"
+          onValueChange={changeAudioVolume}
+        />
+
         <div className="flex items-center gap-2">
           <TooltipProvider>
             <Tooltip>
@@ -68,6 +90,34 @@ export const VideoStream = ({ hardwareId }: VideoStreamProps) => {
                 }
               >
                 <p>{isVideoPlaying ? "Pause Video" : "Putar Video"}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  className="rounded-full aspect-square"
+                  variant={isAudioPlaying ? "default" : "outline"}
+                  onClick={toggleAudioPlaying}
+                >
+                  {isAudioPlaying ? (
+                    <Volume2Icon className="size-10" />
+                  ) : (
+                    <VolumeXIcon className="size-10" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent
+                className={
+                  isAudioPlaying
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-popover text-popover-foreground"
+                }
+              >
+                <p>{isAudioPlaying ? "Pause Suara" : "Putar Suara"}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
