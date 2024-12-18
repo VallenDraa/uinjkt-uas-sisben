@@ -8,7 +8,7 @@ from .models import BabyNotificationModel
 
 
 class BabyNotificationListCreateView(ListCreateAPIView):
-    queryset = BabyNotificationModel.objects.all()
+    queryset = BabyNotificationModel.objects.all().order_by("-created_at")
     serializer_class = BabyNotificationSerializer
     filterset_class = BabyNotificationFilter
     filter_backends = [

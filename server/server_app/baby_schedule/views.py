@@ -48,7 +48,7 @@ class BabyScheduleViewSet(viewsets.ViewSet):
             schedule = BabyScheduleModel.objects.get(pk=pk, hardware_id=hardware_id)
         except BabyScheduleModel.DoesNotExist:
             return Response(
-                {"error": "Schedule not found"}, status=status.HTTP_404_NOT_FOUND
+                {"message": "Schedule not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
         organized_schedules = organize_schedules_parts_of_day([schedule])
@@ -65,7 +65,7 @@ class BabyScheduleViewSet(viewsets.ViewSet):
             schedule = BabyScheduleModel.objects.get(pk=pk, hardware_id=hardware_id)
         except BabyScheduleModel.DoesNotExist:
             return Response(
-                {"error": "Schedule not found"}, status=status.HTTP_404_NOT_FOUND
+                {"message": "Schedule not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
         schedule.delete()
@@ -81,7 +81,7 @@ class BabyScheduleViewSet(viewsets.ViewSet):
             hardware_instance = MonitorHardwareModel.objects.get(id=hardware_id)
         except MonitorHardwareModel.DoesNotExist:
             return Response(
-                {"error": f"Hardware with code '{hardware_id}' not found."},
+                {"message": f"Hardware with code '{hardware_id}' not found."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
@@ -95,7 +95,7 @@ class BabyScheduleViewSet(viewsets.ViewSet):
         if not notification_from or not notification_to:
             return Response(
                 {
-                    "error": "Both 'notification_from' and 'notification_to' are required."
+                    "message": "Both 'notification_from' and 'notification_to' are required."
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -106,7 +106,11 @@ class BabyScheduleViewSet(viewsets.ViewSet):
             created_at__gte=notification_from,
             created_at__lte=notification_to,
         )
-        notifications_data = list(notifications_queryset.values())
+        notifications_data = list(
+            notifications_queryset.filter(clarification__isnull=False)
+            .exclude(clarification="")
+            .values()
+        )
 
         if len(notifications_data) is 0:
             response_data = OrganizedSchedulesSerializer([], many=True).data
@@ -114,7 +118,7 @@ class BabyScheduleViewSet(viewsets.ViewSet):
 
         if len(notifications_data) > 100:
             return Response(
-                {"error": "Too many notifications to process."},
+                {"message": "Too many notifications to process."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -129,7 +133,7 @@ class BabyScheduleViewSet(viewsets.ViewSet):
 
         if is_all_clarification_empty:
             return Response(
-                {"error": "All clarification are empty."},
+                {"message": "All clarification are empty."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

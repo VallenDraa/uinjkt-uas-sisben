@@ -1,11 +1,9 @@
 import { z } from "zod";
 import { BabyNotification } from "../types/baby-notification.types";
 
-export const babyNotificationTitleEnums = z.enum(["crying", "discomfort"]);
-
 export const babyNotificationsValidator: z.Schema<BabyNotification> = z.object({
   id: z.string(),
-  title: babyNotificationTitleEnums,
+  title: z.string(),
   picture: z.string(),
   clarification: z.string(),
   temp_celcius: z.number(),

@@ -1,11 +1,6 @@
-import { z } from "zod";
-import { type babyNotificationTitleEnums } from "../validators/baby-notifications.validator";
-
-export type BabyNotificationTitle = z.infer<typeof babyNotificationTitleEnums>;
-
 export type BabyNotification = {
   id: string;
-  title: BabyNotificationTitle;
+  title: string;
   picture: string;
   clarification: string;
   temp_celcius: number;

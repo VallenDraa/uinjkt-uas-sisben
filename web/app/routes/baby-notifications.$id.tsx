@@ -39,6 +39,7 @@ import { babyNotificationsValidator } from "~/features/baby-notification/validat
 import { Button } from "~/shared/components/ui/button";
 import { useBabyNotification } from "~/features/baby-notification/hooks/use-baby-notification";
 import { requirehardwareIdMiddleware } from "~/middlewares/require-hardware-id.middleware";
+import React from "react";
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   await requirehardwareIdMiddleware(request);
@@ -93,8 +94,15 @@ const SingleBabyNotificationPage = () => {
 
   const form = useForm<BabyNotification>({
     resolver: zodResolver(babyNotificationsValidator),
-    defaultValues: babyNotificationsQuery.data,
+    defaultValues: {
+      ...babyNotificationsQuery.data,
+      clarification: babyNotificationsQuery.data?.clarification ?? "",
+    },
   });
+
+  React.useEffect(() => {
+    console.log(form.formState.errors);
+  }, [form.formState.errors]);
 
   return (
     <PageLayout

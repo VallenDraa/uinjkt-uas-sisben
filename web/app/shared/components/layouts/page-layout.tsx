@@ -92,7 +92,9 @@ export const PageLayout = ({
         </div>
       </header>
 
-      <main className={cn("grow py-6 px-4", classNames?.main)}>{children}</main>
+      <main className={cn("grow py-6 px-4 relative z-10", classNames?.main)}>
+        {children}
+      </main>
 
       <footer className={cn("pb-6 space-y-6 mt-auto px-4", classNames?.footer)}>
         <Separator />

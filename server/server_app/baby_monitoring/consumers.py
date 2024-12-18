@@ -12,15 +12,35 @@ from monitor_hardware.models import MonitorHardwareModel
 from .ai.predict_is_crying import predict_is_crying
 from .ai.predict_is_uncomfortable import predict_is_uncomfortable
 
-
 global_temps_humidity = {}
-
 
 last_uncomfortable_prediction = {}
 last_crying_prediction = {}
 
-UNCOMFORTABLE_PREDICTION_COOLDOWN = 3
-CRYING_PREDICTION_COOLDOWN = 3
+UNCOMFORTABLE_PREDICTION_COOLDOWN = 5
+CRYING_PREDICTION_COOLDOWN = 5
+
+# Notification threshold settings
+notification_counters = {}
+NOTIFICATION_THRESHOLD = 5
+NOTIFICATION_WINDOW = 5
+
+
+def should_save_notification(hardware_id):
+    current_time = time.time()
+    count, first_time = notification_counters.get(hardware_id, (0, current_time))
+    if current_time - first_time <= NOTIFICATION_WINDOW:
+        count += 1
+    else:
+        count = 1
+        first_time = current_time
+    notification_counters[hardware_id] = (count, first_time)
+
+    if count >= NOTIFICATION_THRESHOLD:
+        notification_counters[hardware_id] = (0, current_time)
+        return True
+    else:
+        return False
 
 
 class BabyMonitoringVideoConsumer(WebsocketConsumer):
@@ -71,32 +91,44 @@ class BabyMonitoringVideoConsumer(WebsocketConsumer):
                             id=self.hardware_id
                         )
 
-                        with open(image_path, "rb") as img_file:
-                            notification = BabyNotificationModel.objects.create(
-                                hardware_id=monitor_hardware,
-                                title="Bayi Terlihat Tidak Nyaman!",
-                                picture=ImageFile(img_file, name=image_path.name),
-                                temp_celcius=temps_humidity.get("temp_celcius", 0),
-                                temp_farenheit=temps_humidity.get("temp_farenheit", 0),
-                                humidity=temps_humidity.get("humidity", 0),
-                            )
+                        if should_save_notification(self.hardware_id):
+                            with open(image_path, "rb") as img_file:
+                                notification = BabyNotificationModel.objects.create(
+                                    hardware_id=monitor_hardware,
+                                    title="Bayi Terlihat Tidak Nyaman!",
+                                    picture=ImageFile(img_file, name=image_path.name),
+                                    temp_celcius=temps_humidity.get("temp_celcius", 0),
+                                    temp_farenheit=temps_humidity.get(
+                                        "temp_farenheit", 0
+                                    ),
+                                    humidity=temps_humidity.get("humidity", 0),
+                                )
 
+                                async_to_sync(self.channel_layer.group_send)(
+                                    self.room_group_name,
+                                    {
+                                        "type": "uncomfortable.message",
+                                        "sender_channel_name": self.channel_name,
+                                        "time": notification.created_at.strftime(
+                                            "%Y-%m-%d %H:%M:%S"
+                                        ),
+                                    },
+                                )
+                            img_file.close()
+                        else:
                             async_to_sync(self.channel_layer.group_send)(
                                 self.room_group_name,
                                 {
                                     "type": "uncomfortable.message",
                                     "sender_channel_name": self.channel_name,
-                                    "time": notification.created_at.strftime(
-                                        "%Y-%m-%d %H:%M:%S"
-                                    ),
+                                    "time": time.strftime("%Y-%m-%d %H:%M:%S"),
                                 },
                             )
-                            img_file.close()
 
                 self.send(text_data=json.dumps({"message": "Video image received."}))
             except Exception as e:
                 print(f"Failed to process image: {e}")
-                self.send(text_data=json.dumps({"error": "Failed to process image."}))
+                self.send(text_data=json.dumps({"message": "Failed to process image."}))
 
     def uncomfortable_message(self, event):
 
@@ -192,34 +224,49 @@ class BabyMonitoringAudioConsumer(WebsocketConsumer):
                         IMAGES_DIR.mkdir(exist_ok=True)
                         image_path = IMAGES_DIR / f"{self.hardware_id}_video_frame.jpeg"
 
-                        with open(image_path, "rb") as img_file:
-                            notification = BabyNotificationModel.objects.create(
-                                hardware_id=monitor_hardware,
-                                title="Bayi Menangis!",
-                                picture=ImageFile(img_file, name=image_path.name),
-                                temp_celcius=temps_humidity.get("temp_celcius", 0),
-                                temp_farenheit=temps_humidity.get("temp_farenheit", 0),
-                                humidity=temps_humidity.get("humidity", 0),
-                            )
+                        if should_save_notification(self.hardware_id):
+                            with open(image_path, "rb") as img_file:
+                                notification = BabyNotificationModel.objects.create(
+                                    hardware_id=monitor_hardware,
+                                    title="Bayi Menangis!",
+                                    picture=ImageFile(img_file, name=image_path.name),
+                                    temp_celcius=temps_humidity.get("temp_celcius", 0),
+                                    temp_farenheit=temps_humidity.get(
+                                        "temp_farenheit", 0
+                                    ),
+                                    humidity=temps_humidity.get("humidity", 0),
+                                )
 
+                                async_to_sync(self.channel_layer.group_send)(
+                                    self.room_group_name,
+                                    {
+                                        "type": "crying.message",
+                                        "sender_channel_name": self.channel_name,
+                                        "time": notification.created_at.strftime(
+                                            "%Y-%m-%d %H:%M:%S"
+                                        ),
+                                        "crying_detected": True,
+                                    },
+                                )
+
+                            img_file.close()
+
+                        else:
                             async_to_sync(self.channel_layer.group_send)(
                                 self.room_group_name,
                                 {
                                     "type": "crying.message",
                                     "sender_channel_name": self.channel_name,
-                                    "time": notification.created_at.strftime(
-                                        "%Y-%m-%d %H:%M:%S"
-                                    ),
+                                    "time": time.strftime("%Y-%m-%d %H:%M:%S"),
                                     "crying_detected": True,
                                 },
                             )
-                            img_file.close()
 
                 self.send(text_data=json.dumps({"message": "Audio chunk received."}))
 
             except Exception as e:
                 print(f"Failed to process audio: {e}")
-                self.send(text_data=json.dumps({"error": "Failed to process audio."}))
+                self.send(text_data=json.dumps({"message": "Failed to process audio."}))
 
     def crying_message(self, event):
         if event["sender_channel_name"] != self.channel_name:
@@ -261,6 +308,39 @@ class BabyMonitoringTempsHumidityConsumer(WebsocketConsumer):
             "temp_farenheit": data["temp_farenheit"],
             "humidity": data["humidity"],
         }
+
+        if (
+            data["humidity"] > 70
+            or data["temp_celcius"] > 30
+            or data["temp_farenheit"] > 86
+        ):
+            monitor_hardware = MonitorHardwareModel.objects.get(id=self.hardware_id)
+            notification_title = ""
+            if data["humidity"] > 70:
+                notification_title += "Terlalu lembab. "
+            if data["temp_celcius"] > 30 or data["temp_farenheit"] > 86:
+                notification_title += "Terlalu panas."
+
+            print(
+                "🚀 ~ should_save_notification(self.hardware_id):",
+                should_save_notification(self.hardware_id),
+            )
+            if should_save_notification(self.hardware_id):
+                IMAGES_DIR = Path("./baby_monitoring/images")
+                IMAGES_DIR.mkdir(exist_ok=True)
+                image_path = IMAGES_DIR / f"{self.hardware_id}_video_frame.jpeg"
+
+                with open(image_path, "rb") as img_file:
+                    BabyNotificationModel.objects.create(
+                        hardware_id=monitor_hardware,
+                        picture=ImageFile(img_file, name=image_path.name),
+                        title=notification_title.strip(),
+                        temp_celcius=data["temp_celcius"],
+                        temp_farenheit=data["temp_farenheit"],
+                        humidity=data["humidity"],
+                    )
+
+                    img_file.close()
 
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,

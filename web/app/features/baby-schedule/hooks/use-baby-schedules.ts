@@ -4,6 +4,7 @@ import { useGenerateBabySchedules } from "../queries/generate-baby-schedules.que
 import { useGetBabySchedules } from "../queries/get-baby-schedules.query";
 import { isBabySchedulesEmpty } from "../utils/baby-schedule.utils";
 import { useAlternatingText } from "~/shared/hooks/use-alternating-text";
+import { isAxiosError } from "axios";
 
 export type UseBabySchedules = {
   hardwareId: string;
@@ -44,13 +45,17 @@ export const useBabySchedules = ({
 
       if (isBabySchedulesEmpty(babySchedules)) {
         toast.error(
-          "Sepertinya dari range tanggal yang kamu pilih, tidak ada notifikasi untuk membuat jadwal",
+          "Sepertinya dari range tanggal yang kamu pilih, tidak ada notifikasi untuk membuat jadwal ataupun semua klarifikasinya masih kosong",
         );
       } else {
         toast.success("Berhasil membuat jadwal bayi baru");
       }
     } catch (error) {
-      toast.error("Gagal membuat jadwal bayi");
+      if (isAxiosError(error)) {
+        toast.error(error.response?.data.message);
+      }
+
+      toast.error("Gagal membuat jadwal bayi baru");
     }
   }, [generateBabySchedules, hardwareId, notificationFrom, notificationTo]);
 
