@@ -33,6 +33,11 @@ def predict_is_uncomfortable(image_path: str) -> str:
         predicted_label = labels[predicted_class_idx]
         print("predicted label from picture:", predicted_label)
 
-        return predicted_label == "sad"
+        return (
+            predicted_label == "anger"
+            or predicted_label == "fear"
+            or predicted_label == "sad"
+            or predicted_label == "disgust"
+        )
     except Exception as e:
         return f"Error: {e}"

@@ -67,7 +67,6 @@ class BabyMonitoringVideoConsumer(WebsocketConsumer):
 
                     if is_baby_uncomfortable:
                         temps_humidity = global_temps_humidity.get(self.hardware_id, {})
-                        print("🚀 ~ hardware_id 1:", self.hardware_id)
                         monitor_hardware = MonitorHardwareModel.objects.get(
                             id=self.hardware_id
                         )
@@ -100,6 +99,7 @@ class BabyMonitoringVideoConsumer(WebsocketConsumer):
                 self.send(text_data=json.dumps({"error": "Failed to process image."}))
 
     def uncomfortable_message(self, event):
+
         if event["sender_channel_name"] != self.channel_name:
             self.send(
                 text_data=json.dumps(
@@ -195,7 +195,7 @@ class BabyMonitoringAudioConsumer(WebsocketConsumer):
                         with open(image_path, "rb") as img_file:
                             notification = BabyNotificationModel.objects.create(
                                 hardware_id=monitor_hardware,
-                                title="Bayi Terlihat Tidak Nyaman!",
+                                title="Bayi Menangis!",
                                 picture=ImageFile(img_file, name=image_path.name),
                                 temp_celcius=temps_humidity.get("temp_celcius", 0),
                                 temp_farenheit=temps_humidity.get("temp_farenheit", 0),

@@ -2,13 +2,12 @@
 #include <driver/i2s.h>
 #include <WiFi.h>
 
-#define SSID "KUSRIYAH 2"
-#define PASSWORD "achun132139"
+#define SSID "Harnas"
+#define PASSWORD "11111111"
 
-#define WS_SERVER_HOST "192.168.100.4"
+#define WS_SERVER_HOST " 192.168.0.137"
 #define WS_SERVER_PORT 8000
 #define WS_AUDIO_PATH "ws/baby-monitoring/audio/0kx4HkAbWNFZ/"
-
 
 // INMP 441
 // Microphone I2S Configuration
@@ -17,33 +16,38 @@
 #define SAMPLE_RATE 44100
 
 // INMP 441 Pin Assignments
-#define I2S_MIC_SERIAL_CLOCK 13  // SCK
-#define I2S_MIC_SERIAL_DATA 12   // SD
-#define I2S_MIC_WORD_SELECT 15   // WS
+#define I2S_MIC_SERIAL_CLOCK 13 // SCK
+#define I2S_MIC_SERIAL_DATA 12  // SD
+#define I2S_MIC_WORD_SELECT 15  // WS
 
 websockets::WebsocketsClient audio_ws_client;
 
 // WiFi and WebSocket Initialization
-void init_wifi_and_websockets() {
+void init_wifi_and_websockets()
+{
   WiFi.begin(SSID, PASSWORD);
   Serial.println("Connecting to WiFi...");
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED)
+  {
     delay(500);
     Serial.print(".");
   }
   Serial.println("\nWiFi connected!");
 
   // Connect WebSocket clients
-  if (!audio_ws_client.connect(WS_SERVER_HOST, WS_SERVER_PORT, WS_AUDIO_PATH)) {
+  if (!audio_ws_client.connect(WS_SERVER_HOST, WS_SERVER_PORT, WS_AUDIO_PATH))
+  {
     Serial.println("WebSocket connection failed!");
-  } else {
+  }
+  else
+  {
     Serial.println("WebSocket connections established.");
   }
 }
 
-
 int16_t raw_samples[SAMPLE_BUFFER_LENGTH];
-void init_microphone() {
+void init_microphone()
+{
   i2s_config_t i2s_config = {
       .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX),
       .sample_rate = SAMPLE_RATE,
@@ -63,50 +67,64 @@ void init_microphone() {
       .data_in_num = I2S_MIC_SERIAL_DATA,
   };
 
-  if (i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL) == ESP_OK) {
+  if (i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL) == ESP_OK)
+  {
     i2s_set_pin(I2S_NUM_0, &i2s_mic_pins);
     Serial.println("Microphone initialized.");
-  } else {
+  }
+  else
+  {
     Serial.println("Microphone initialization failed.");
     ESP.restart();
   }
 }
-void applyGain(int16_t *buffer, size_t length, float gain) {
-  for (size_t i = 0; i < length; i++) {
+void applyGain(int16_t *buffer, size_t length, float gain)
+{
+  for (size_t i = 0; i < length; i++)
+  {
     int32_t amplified = buffer[i] * gain; // Apply gain
-    if (amplified > 32767) {
+    if (amplified > 32767)
+    {
       amplified = 32767; // Clip to max positive value
-    } else if (amplified < -32768) {
+    }
+    else if (amplified < -32768)
+    {
       amplified = -32768; // Clip to max negative value
     }
     buffer[i] = amplified; // Write back amplified value
   }
 }
-void microphone_task() {
+void microphone_task()
+{
   size_t bytes_read = 0;
-  if (i2s_read(I2S_NUM_0, &raw_samples, SAMPLE_BUFFER_LENGTH, &bytes_read, portMAX_DELAY) == ESP_OK) {
+  if (i2s_read(I2S_NUM_0, &raw_samples, SAMPLE_BUFFER_LENGTH, &bytes_read, portMAX_DELAY) == ESP_OK)
+  {
     size_t samples_read = bytes_read / sizeof(int16_t);
     applyGain(raw_samples, samples_read, 40);
 
-      
     audio_ws_client.sendBinary((const char *)raw_samples, bytes_read);
     Serial.print("Audio data sent: ");
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++)
+    {
       Serial.print(raw_samples[i]);
       Serial.print(" ");
     }
     Serial.println(" ");
-  } else {
+  }
+  else
+  {
     Serial.println("Failed to read audio data.");
   }
 }
 
-void setup() {
+void setup()
+{
   Serial.begin(115200);
   init_wifi_and_websockets();
   init_microphone();
 }
 
-void loop() {
+void loop()
+{
   microphone_task();
 }

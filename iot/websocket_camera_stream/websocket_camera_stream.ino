@@ -1,4 +1,3 @@
-#include <driver/i2s.h>
 #include <WiFi.h>
 #include <ArduinoWebsockets.h>
 #include <DHT.h>
@@ -12,9 +11,10 @@ TaskHandle_t camera_task_handler, dht22_task_handler;
 // WebSocket Clients
 websockets::WebsocketsClient temps_humidity_ws_client;
 websockets::WebsocketsClient video_ws_client;
+// websockets::WebsocketsClient audio_ws_client;
 
 // WiFi and WebSocket Initialization
-void init_wifi_and_websockets()
+void wifi_and_websockets_init()
 {
   WiFi.begin(SSID, PASSWORD);
   Serial.println("Connecting to WiFi...");
@@ -25,10 +25,19 @@ void init_wifi_and_websockets()
   }
   Serial.println("\nWiFi connected!");
 
+  bool is_temps_connected = temps_humidity_ws_client.connect(WS_SERVER_HOST, WS_SERVER_PORT, WS_TEMPS_HUMIDITY_PATH);
+  bool is_video_connected = video_ws_client.connect(WS_SERVER_HOST, WS_SERVER_PORT, WS_VIDEO_PATH);
+  // bool is_audio_connected = audio_ws_client.connect(WS_SERVER_HOST, WS_SERVER_PORT, WS_AUDIO_PATH); 
+
+  Serial.println(is_temps_connected);
+  Serial.println(is_video_connected);
+  // Serial.println(is_audio_connected);
+
   // Connect WebSocket clients
-  if (!temps_humidity_ws_client.connect(WS_SERVER_HOST, WS_SERVER_PORT, WS_TEMPS_HUMIDITY_PATH) ||
-      !video_ws_client.connect(WS_SERVER_HOST, WS_SERVER_PORT, WS_VIDEO_PATH))
-  {
+  if (
+    !is_temps_connected || !is_video_connected 
+  // || !is_audio_connected
+  ) {
     Serial.println("WebSocket connection failed!");
   }
   else
@@ -37,7 +46,7 @@ void init_wifi_and_websockets()
   }
 }
 
-void init_camera()
+void camera_init()
 {
   camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;
@@ -60,9 +69,9 @@ void init_camera()
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 9000000;
   config.pixel_format = PIXFORMAT_JPEG;
-  config.frame_size = FRAMESIZE_VGA;
+  config.frame_size = FRAMESIZE_SVGA;
   config.fb_location = CAMERA_FB_IN_PSRAM;
-  config.jpeg_quality = 15;
+  config.jpeg_quality = 10;
   config.grab_mode = CAMERA_GRAB_LATEST;
   config.fb_count = 2;
 
@@ -80,57 +89,74 @@ void init_camera()
     s->set_vflip(s, 1);      // 0 = disable , 1 = enable
   }
 }
-void camera_task(void *param)
+void camera_task()
 {
-  init_camera();
+  camera_fb_t *fb = esp_camera_fb_get();
 
-  while (true)
+  if (!fb)
   {
-    camera_fb_t *fb = esp_camera_fb_get();
-    if (!fb)
-    {
-      Serial.println("Failed to capture frame!");
-    }
-    else
-    {
-      video_ws_client.sendBinary((const char *)fb->buf, fb->len);
-      Serial.println("Video frame sent.");
-      esp_camera_fb_return(fb);
-    }
+    Serial.println("Failed to capture frame!");
+  }
+  else
+  {
+    video_ws_client.sendBinary((const char *)fb->buf, fb->len);
+    Serial.println("Video frame sent.");
+    esp_camera_fb_return(fb);
   }
 }
 
-void dht22_task(void *param)
+DHT dht(DHT_PIN, DHT_TYPE);
+void dh22_init() 
 {
-
-  DHT dht(DHT_PIN, DHT_TYPE);
   dht.begin();
+}
+void dht22_task()
+{
+  float humidity = dht.readHumidity();
+  float temp_celcius = dht.readTemperature();
+  float temp_farenheit = dht.readTemperature(true);
 
-  unsigned long last_temp_sent_millis = 0;
-  while (true)
+  if (!isnan(humidity) && !isnan(temp_celcius))
   {
-    unsigned long current_millis = millis();
-    // DHT22 Data
-    if (current_millis - last_temp_sent_millis >= 2000)
-    {
-      float humidity = dht.readHumidity();
-      float temp_celcius = dht.readTemperature();
-      float temp_farenheit = dht.readTemperature(true);
-
-      if (!isnan(humidity) && !isnan(temp_celcius))
-      {
-        String message = "{\"temp_celcius\":" + String(temp_celcius) + ",\"temp_farenheit\":" + String(temp_farenheit) + ",\"humidity\":" + String(humidity) + "}";
-        temps_humidity_ws_client.send(message);
-        Serial.println("DHT22 data sent: " + message);
-      }
-      else
-      {
-        Serial.println("Failed to read DHT sensor.");
-      }
-
-      last_temp_sent_millis = current_millis;
-    }
+    String message = "{\"temp_celcius\":" + String(temp_celcius) + ",\"temp_farenheit\":" + String(temp_farenheit) + ",\"humidity\":" + String(humidity) + "}";
+    temps_humidity_ws_client.send(message);
+    Serial.println("DHT22 data sent: " + message);
   }
+  else
+  {
+    Serial.println("Failed to read DHT sensor.");
+  }
+}
+
+
+int audio_buffer[BUFFER_SIZE];
+void fc04_init()
+{
+  pinMode(FC04_PIN, INPUT);
+}
+void fc04_task()
+{
+  // Fill the buffer with sampled audio data
+  // for (int i = 0; i < BUFFER_SIZE; i++)
+  // {
+  //   int reading = analogRead(FC04_PIN); // Read analog values (0–4095 for ESP32)
+  //   Serial.println(reading);
+  //   audio_buffer[i] = reading;
+  //   delayMicroseconds(1000000 / SAMPLE_RATE); // Ensure correct sampling rate
+  // }
+
+  // // Convert the audio buffer to 16-bit PCM
+  // uint8_t pcm_buffer[BUFFER_SIZE * 2]; // 16-bit PCM requires 2 bytes per sample
+  // for (int i = 0; i < BUFFER_SIZE; i++)
+  // {
+  //   int16_t sample = map(audio_buffer[i], 0, 4095, -32768, 32767); // Map 12-bit ADC to 16-bit PCM
+  //   pcm_buffer[i * 2] = sample & 0xFF;        // Lower byte
+  //   pcm_buffer[i * 2 + 1] = (sample >> 8) & 0xFF; // Upper byte
+  // }
+
+  // // Send PCM data over WebSocket
+  // audio_ws_client.sendBinary((const char *)pcm_buffer, sizeof(pcm_buffer));
+  // Serial.println("Audio chunk sent!");
 }
 
 void setup()
@@ -138,14 +164,22 @@ void setup()
   Serial.begin(115200);
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
 
-  init_wifi_and_websockets();
-
-  xTaskCreatePinnedToCore(
-      camera_task, "CameraTask", 10000, NULL, 2, &camera_task_handler, 0);
-  xTaskCreatePinnedToCore(
-      dht22_task, "DHT22MicrophoneTask", 10000, NULL, 3, &dht22_task_handler, 1);
+  wifi_and_websockets_init();
+  dh22_init();
+  camera_init();
+  // fc04_init();
 }
 
 void loop()
 {
+  camera_task();
+  // fc04_task();
+
+  unsigned long current_millis = millis();
+  static unsigned long last_temp_sent_millis = 0;
+  if (current_millis - last_temp_sent_millis >= 1500)
+  {
+    dht22_task();
+    last_temp_sent_millis = current_millis;
+  }
 }
