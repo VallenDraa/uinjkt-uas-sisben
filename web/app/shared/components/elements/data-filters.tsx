@@ -61,9 +61,9 @@ export const DataFilters = ({
           onUpdate={({ from, to }) => {
             setInnerDateRange({ from, to });
             setFilters({
-              created_at__range: `${formatDateYYYYMMDD(
+              created_at__range: `${`${formatDateYYYYMMDD(
                 from,
-              )},${formatDateYYYYMMDD(to ?? from)}`,
+              )}T00:00:00`},${`${formatDateYYYYMMDD(to ?? from)}T23:59:59`}`,
             });
           }}
           range={{

@@ -13,6 +13,7 @@ import {
 import { Typography } from "~/shared/components/ui/typography";
 import { getDateAndTime } from "~/shared/utils/formatter";
 import { Image } from "~/shared/components/ui/image";
+import { cn } from "~/shared/utils/shadcn";
 
 export type BabyNotificationsListItemProps = { item: BabyNotification };
 
@@ -51,8 +52,14 @@ export const BabyNotificationsListItem = ({
         </CardHeader>
 
         <CardContent className="flex flex-row items-start gap-2 mt-2 md:mt-0">
-          <CardDescription className="grow line-clamp-4 transition-colors duration-300 group-hover:text-primary">
-            {item.clarification}
+          <CardDescription
+            className={cn(
+              "grow line-clamp-4 transition-colors duration-300 group-hover:text-primary",
+              !item.clarification && "italic opacity-70",
+            )}
+          >
+            {item.clarification ||
+              "Belum ada klarifikasi untuk notifikasi ini."}
           </CardDescription>
 
           <Image

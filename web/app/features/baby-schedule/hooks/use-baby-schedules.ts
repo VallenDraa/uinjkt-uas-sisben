@@ -43,19 +43,17 @@ export const useBabySchedules = ({
         notification_to: notificationTo,
       });
 
-      if (isBabySchedulesEmpty(babySchedules)) {
-        toast.error(
-          "Sepertinya dari range tanggal yang kamu pilih, tidak ada notifikasi untuk membuat jadwal ataupun semua klarifikasinya masih kosong",
-        );
-      } else {
-        toast.success("Berhasil membuat jadwal bayi baru");
+      toast.success("Berhasil membuat jadwal bayi baru");
+
+      if (babySchedules.message) {
+        toast.info(babySchedules.message);
       }
     } catch (error) {
       if (isAxiosError(error)) {
         toast.error(error.response?.data.message);
+      } else {
+        toast.error("Gagal membuat jadwal bayi baru");
       }
-
-      toast.error("Gagal membuat jadwal bayi baru");
     }
   }, [generateBabySchedules, hardwareId, notificationFrom, notificationTo]);
 

@@ -113,8 +113,12 @@ class BabyScheduleViewSet(viewsets.ViewSet):
         )
 
         if len(notifications_data) is 0:
-            response_data = OrganizedSchedulesSerializer([], many=True).data
-            return Response(response_data)
+            return Response(
+                {
+                    "message": "No notifications are present, either all of the clarifications are empty or there are no notifications at all."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         if len(notifications_data) > 100:
             return Response(
@@ -143,7 +147,7 @@ class BabyScheduleViewSet(viewsets.ViewSet):
         bulk_schedules = BabyScheduleModel.objects.bulk_create(
             [
                 BabyScheduleModel(hardware_id=hardware_instance, **schedule)
-                for schedule in new_schedules
+                for schedule in new_schedules["values"]
             ]
         )
 
@@ -152,6 +156,6 @@ class BabyScheduleViewSet(viewsets.ViewSet):
             organized_schedules, many=True
         ).data
         return Response(
-            response_data,
+            {"values": response_data, "message": new_schedules["message"]},
             status=status.HTTP_201_CREATED,
         )

@@ -13,3 +13,7 @@ export type BabySchedulesResponse = {
   part_of_day: PartsOfDay;
   schedules: BabySchedule[];
 };
+export type BabySchedulesGenerateResponse = {
+  values: BabySchedulesResponse[];
+  message: string | null;
+};

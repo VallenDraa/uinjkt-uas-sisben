@@ -29,7 +29,7 @@ export const useGenerateBabySchedules = ({
     onSuccess: data => {
       queryClient.setQueryData(
         getBabySchedulesQueryOptions(hardwareId).queryKey,
-        () => data,
+        () => data.values,
       );
     },
   });

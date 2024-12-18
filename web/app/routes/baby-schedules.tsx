@@ -73,8 +73,16 @@ const BabySchedulePage = () => {
     loadingGeneratingText,
   } = useBabySchedules({
     hardwareId,
-    notificationFrom: dateRange.from.toISOString(),
-    notificationTo: dateRange.to?.toISOString() ?? new Date().toISOString(),
+    notificationFrom: `${
+      new Date(dateRange.from.getTime() + 1000 * 60 * 60 * 24)
+        .toISOString()
+        .split("T")[0]
+    }T00:00:00`,
+    notificationTo: `${
+      new Date((dateRange.to ?? new Date()).getTime() + 1000 * 60 * 60 * 24)
+        .toISOString()
+        .split("T")[0]
+    }T23:59:59`,
     enableQuery: true,
   });
 
@@ -112,7 +120,6 @@ const BabySchedulePage = () => {
             description={loadingGeneratingText}
           />
         )}
-
         {!generateBabySchedulesMutation.isPending &&
           (babySchedulesQuery.isLoading || !babySchedulesQuery.data) && (
             <TimelineItemSkeleton
@@ -120,7 +127,6 @@ const BabySchedulePage = () => {
               className="animate-in fade-in duration-300"
             />
           )}
-
         {!generateBabySchedulesMutation.isPending &&
           !babySchedulesQuery.isLoading && (
             <>

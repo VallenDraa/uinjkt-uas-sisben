@@ -1,5 +1,5 @@
 import { api } from "~/lib/axios";
-import { BabySchedulesResponse } from "../types/baby-schedule.types";
+import { BabySchedulesGenerateResponse } from "../types/baby-schedule.types";
 
 export const generateBabySchedules = async ({
   hardware_id,
@@ -10,7 +10,7 @@ export const generateBabySchedules = async ({
   notification_from: string;
   notification_to: string;
 }) => {
-  const { data } = await api.post<BabySchedulesResponse[]>(
+  const { data } = await api.post<BabySchedulesGenerateResponse>(
     `/baby-schedules/${hardware_id}/`,
     {
       notification_from,
