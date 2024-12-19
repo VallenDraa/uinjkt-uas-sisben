@@ -1,24 +1,7 @@
 #include <ArduinoWebsockets.h>
 #include <driver/i2s.h>
 #include <WiFi.h>
-
-#define SSID "Harnas"
-#define PASSWORD "11111111"
-
-#define WS_SERVER_HOST " 192.168.0.137"
-#define WS_SERVER_PORT 8000
-#define WS_AUDIO_PATH "ws/baby-monitoring/audio/0kx4HkAbWNFZ/"
-
-// INMP 441
-// Microphone I2S Configuration
-#define SAMPLE_BUFFER_COUNT 10
-#define SAMPLE_BUFFER_LENGTH 1024
-#define SAMPLE_RATE 44100
-
-// INMP 441 Pin Assignments
-#define I2S_MIC_SERIAL_CLOCK 13 // SCK
-#define I2S_MIC_SERIAL_DATA 12  // SD
-#define I2S_MIC_WORD_SELECT 15  // WS
+#include "env.h"
 
 websockets::WebsocketsClient audio_ws_client;
 

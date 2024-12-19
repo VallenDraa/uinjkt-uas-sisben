@@ -138,22 +138,27 @@ const BabySchedulePage = () => {
               )}
 
               {babySchedulesQuery.data?.map(data => {
-                return data.schedules.map(schedule => (
-                  <TimelineItem
-                    key={schedule.id}
-                    className="animate-in fade-in duration-300"
-                  >
-                    <TimelineHeader>
-                      <TimelineTime>
-                        {new Date(schedule.time).toLocaleTimeString()}
-                      </TimelineTime>
-                      <TimelineTitle>{schedule.title}</TimelineTitle>
-                    </TimelineHeader>
-                    <TimelineDescription>
-                      {schedule.description}
-                    </TimelineDescription>
-                  </TimelineItem>
-                ));
+                return data.schedules
+                  .toSorted(
+                    (a, b) =>
+                      new Date(a.time).getTime() - new Date(b.time).getTime(),
+                  )
+                  .map(schedule => (
+                    <TimelineItem
+                      key={schedule.id}
+                      className="animate-in fade-in duration-300"
+                    >
+                      <TimelineHeader>
+                        <TimelineTime>
+                          {new Date(schedule.time).toLocaleTimeString()}
+                        </TimelineTime>
+                        <TimelineTitle>{schedule.title}</TimelineTitle>
+                      </TimelineHeader>
+                      <TimelineDescription>
+                        {schedule.description}
+                      </TimelineDescription>
+                    </TimelineItem>
+                  ));
               })}
             </>
           )}

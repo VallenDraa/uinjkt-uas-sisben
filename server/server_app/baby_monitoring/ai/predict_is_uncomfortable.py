@@ -4,8 +4,7 @@ from transformers import (
     AutoFeatureExtractor,
     AutoModelForImageClassification,
 )
-from deepface import DeepFace
-import cv2
+
 
 emotion_model_name = "rendy-k/face_emotion_recognizer"
 emotion_model = AutoModelForImageClassification.from_pretrained(
@@ -18,26 +17,6 @@ emotion_feature_extractor = AutoFeatureExtractor.from_pretrained(
 
 def predict_is_uncomfortable(image_path: str) -> str:
     try:
-
-        # Load the image using OpenCV
-        cv2_img = cv2.imread(image_path)
-
-        if cv2_img is None:
-            print(f"Error: Could not load image {image_path}")
-            return False
-
-        # Detect if there's a face in the image
-        detected_faces = DeepFace.detectFace(
-            cv2_img,
-            detector_backend="opencv",
-            enforce_detection=False,
-        )
-
-        # If the face detection returns a non-empty result, a face is detected
-        if detected_faces is None:
-            print("No Face detected!")
-            return False
-
         image = Image.open(image_path).convert("RGB")
         inputs = emotion_feature_extractor(images=image, return_tensors="pt")
 

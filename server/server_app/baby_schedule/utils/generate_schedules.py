@@ -10,7 +10,7 @@ client = Mistral(api_key=os.environ.get("LLM_API_KEY"))
 
 def generate_schedules(client: Mistral, serialized_notifications: str):
     if not serialized_notifications:
-        return []
+        return {"values": [], "message": None}
 
     chat_response = client.chat.complete(
         model="mistral-large-latest",
@@ -18,28 +18,38 @@ def generate_schedules(client: Mistral, serialized_notifications: str):
             {
                 "role": "user",
                 "content": f"""
-                    Jadi saya mempunyai sebuah aplikasi untuk memonitoring bayi
-                    ketika dia menangis ataupun merasakan ketidaknyamanan. Data tersebut
-                    disimpan sebagai JSON. Berikut adalah jsonnya: 
-                    
+                    Saya memiliki sebuah aplikasi untuk memonitoring bayi ketika dia menangis atau merasakan ketidaknyamanan. Data tersebut disimpan dalam format JSON seperti berikut:
+
                     {serialized_notifications}
+
+                    Dari data JSON tersebut, saya ingin Anda membuat jadwal kegiatan harian (schedule) yang dianggap sangat penting dan esensial bagi bayi. Berikut adalah persyaratannya:
+
+                    Pembagian Waktu dalam Hari:
+                        - Pagi: 04:00 - 11:59 WIB
+                        - Siang: 12:00 - 14:59 WIB
+                        - Sore: 15:00 - 17:59 WIB
+                        - Malam: 18:00 - 03:59 WIB
                     
-                    Dari json tersebut saya mau kamu untuk membuat sebuah schedule perharinya. Schedulenya berupa
-                    hal yang kira-kira sangatlah esensial bagi bayinya, sehingga dirasa harus dilakukan oleh orang tua
-                    secara rutin. Untuk jam pada schedulenya harus ada jam pagi (04:00 - 11:59), siang (12:00 - 14:59), sore (15:00 - 17:59), 
-                    dan malam(18:00 - 03:59), letakkan juga nama bagian hari pada title dengan format seperti json dibawah. Abaikan notifikasi yang berhubungan dengan suhu dan kelembapan pada ruangan. Jika memang tidak ada schedule yang bisa dibuat, maka buatkan saran schedule baru tanpa notifikasi, tapi HARUS dan WAJIB beri tahu hal tersebut pada field message pada responsenya. INGAT WAJIB.
+                    Format JSON Output:
+                        {'''
+                        {
+                            "values": [    
+                                "title": "<string>", 
+                                "description": <string>, 
+                                "time": <YYYY-MM-DD'T'hh:mm:ss'Z'>
+                            ],
+                            "message": <string> | null
+                        }'''}
+                        - description: Penjelasan singkat terkait aktivitas yang harus dilakukan, penjelasan harus diperjelas berdasarkan klarifikasi notifikasi sehingga orang tua paham apa yang harus dilakukan.
+                        - time: Waktu aktivitas dalam format ISO 8601 (YYYY-MM-DD'T'hh:mm:ss'Z').
+                        
+                    Ketentuan:
+                        - Abaikan notifikasi yang hanya berkaitan dengan suhu atau kelembapan ruangan.
+                        - Jika tidak ada notifikasi yang cukup relevan untuk membuat jadwal, Anda WAJIB memberikan saran jadwal baru, dengan memberikan pesan yang sesuai di field message. Pesan harus: "Data notifikasi anda belum mencukupi, sehingga kami memberikan saran schedule sebagai berikut."
+                        - Jika ada data notifikasi yang relevan, maka field message diisi dengan null.
                     
-                    Saya mau nilai balikannya juga berupa json dan HANYA jsonnya saja, Untuk format jsonnya adalah sebagai berikut: 
-                    {'''{
-                        "values": [    
-                            "title": "[PAGI | SIANG | SORE | MALAM]: <string>", 
-                            "description": <string>, 
-                            "time": <YYYY-MM-DD'T'hh:mm:ss'Z'>
-                        ],
-                        "message": "Data notifikasi anda belum mencukupi, sehingga kami memberikan saran schedule sebagai berikut." | null
-                    }'''}
-                    
-                    disini time itu harus dalam format ISO 8601. Ingat saya mau nilai balikannya hanya json.
+                    Catatan Penting: 
+                        - Saya ingin nilai balikannya berupa JSON saja, tanpa teks tambahan apa pun di luar format tersebut.
                 """,
             },
         ],
@@ -47,7 +57,6 @@ def generate_schedules(client: Mistral, serialized_notifications: str):
     )
 
     schedules: dict = json.loads(chat_response.choices[0].message.content)
-    print("🚀 ~ schedules:", json.dumps(schedules))
 
     # Process time strings and convert to server timezone
     for schedule in schedules["values"]:

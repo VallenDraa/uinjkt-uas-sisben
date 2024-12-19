@@ -310,21 +310,17 @@ class BabyMonitoringTempsHumidityConsumer(WebsocketConsumer):
         }
 
         if (
-            data["humidity"] > 70
-            or data["temp_celcius"] > 30
-            or data["temp_farenheit"] > 86
+            data["humidity"] > 80
+            or data["temp_celcius"] > 35
+            or data["temp_farenheit"] > 95
         ):
             monitor_hardware = MonitorHardwareModel.objects.get(id=self.hardware_id)
             notification_title = ""
-            if data["humidity"] > 70:
+            if data["humidity"] > 80:
                 notification_title += "Terlalu lembab. "
-            if data["temp_celcius"] > 30 or data["temp_farenheit"] > 86:
+            if data["temp_celcius"] > 35 or data["temp_farenheit"] > 95:
                 notification_title += "Terlalu panas."
 
-            print(
-                "🚀 ~ should_save_notification(self.hardware_id):",
-                should_save_notification(self.hardware_id),
-            )
             if should_save_notification(self.hardware_id):
                 IMAGES_DIR = Path("./baby_monitoring/images")
                 IMAGES_DIR.mkdir(exist_ok=True)
@@ -358,8 +354,8 @@ class BabyMonitoringTempsHumidityConsumer(WebsocketConsumer):
         if event["sender_channel_name"] != self.channel_name:
             message = ""
 
-            is_too_humid = event["humidity"] > 70
-            is_too_hot = event["temp_celcius"] > 30 and event["temp_farenheit"] > 86
+            is_too_humid = event["humidity"] > 80
+            is_too_hot = event["temp_celcius"] > 35 and event["temp_farenheit"] > 95
 
             if is_too_humid:
                 message += "\nTerlalu lembab, tingkat kelembaban yang baik bagi bayi adalah dibawah 70%."
