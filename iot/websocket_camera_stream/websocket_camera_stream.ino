@@ -103,6 +103,8 @@ void camera_task()
     Serial.println("Video frame sent.");
     esp_camera_fb_return(fb);
   }
+
+  video_ws_client.poll();
 }
 
 DHT dht(DHT_PIN, DHT_TYPE);
@@ -126,6 +128,8 @@ void dht22_task()
   {
     Serial.println("Failed to read DHT sensor.");
   }
+
+  temps_humidity_ws_client.poll();
 }
 
 
@@ -167,13 +171,7 @@ void setup()
   wifi_and_websockets_init();
   dh22_init();
   camera_init();
-  // fc04_init();
-}
-
-void loop()
-{
-  camera_task();
-  // fc04_task();
+  // fc04_init();n=n
 
   unsigned long current_millis = millis();
   static unsigned long last_temp_sent_millis = 0;

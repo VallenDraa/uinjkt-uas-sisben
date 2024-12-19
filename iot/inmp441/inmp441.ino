@@ -98,6 +98,7 @@ void microphone_task()
   {
     Serial.println("Failed to read audio data.");
   }
+  audio_ws_client.poll();
 }
 
 void setup()

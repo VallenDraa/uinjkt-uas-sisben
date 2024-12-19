@@ -5,6 +5,7 @@ import { NumberStatsWithIcon } from "~/features/baby-monitoring/components/eleme
 import { VideoStream } from "~/features/baby-monitoring/components/elements/video-stream";
 import { useBabyMonitoringAudioWebSocket } from "~/features/baby-monitoring/websockets/baby-monitoring-audio.websocket";
 import { useBabyMonitoringTempsHumidityWebSocket } from "~/features/baby-monitoring/websockets/baby-monitoring-temps-humidity.websocket";
+import { useBabyMonitoringVideoWebSocket } from "~/features/baby-monitoring/websockets/baby-monitoring-video.websocket";
 import { requirehardwareIdMiddleware } from "~/middlewares/require-hardware-id.middleware";
 import { PageLayout } from "~/shared/components/layouts/page-layout";
 import { Separator } from "~/shared/components/ui/separator";
@@ -27,6 +28,7 @@ const BabyMonitoringPage = () => {
   const isSmallScreen = useMediaQuery("(max-width: 768px)");
 
   useBabyMonitoringAudioWebSocket(hardwareId);
+  useBabyMonitoringVideoWebSocket(hardwareId);
   const { tempsHumidity } = useBabyMonitoringTempsHumidityWebSocket(hardwareId);
 
   return (
