@@ -6,12 +6,9 @@
 #include "esp_camera.h"
 #include "env.h"
 
-TaskHandle_t camera_task_handler, dht22_task_handler;
-
 // WebSocket Clients
 websockets::WebsocketsClient temps_humidity_ws_client;
 websockets::WebsocketsClient video_ws_client;
-// websockets::WebsocketsClient audio_ws_client;
 
 // WiFi and WebSocket Initialization
 void wifi_and_websockets_init()
@@ -27,17 +24,14 @@ void wifi_and_websockets_init()
 
   bool is_temps_connected = temps_humidity_ws_client.connect(WS_SERVER_HOST, WS_SERVER_PORT, WS_TEMPS_HUMIDITY_PATH);
   bool is_video_connected = video_ws_client.connect(WS_SERVER_HOST, WS_SERVER_PORT, WS_VIDEO_PATH);
-  // bool is_audio_connected = audio_ws_client.connect(WS_SERVER_HOST, WS_SERVER_PORT, WS_AUDIO_PATH); 
 
   Serial.println(is_temps_connected);
   Serial.println(is_video_connected);
-  // Serial.println(is_audio_connected);
 
   // Connect WebSocket clients
   if (
-    !is_temps_connected || !is_video_connected 
-  // || !is_audio_connected
-  ) {
+      !is_temps_connected || !is_video_connected)
+  {
     Serial.println("WebSocket connection failed!");
   }
   else
@@ -108,7 +102,7 @@ void camera_task()
 }
 
 DHT dht(DHT_PIN, DHT_TYPE);
-void dh22_init() 
+void dh22_init()
 {
   dht.begin();
 }
@@ -132,37 +126,6 @@ void dht22_task()
   temps_humidity_ws_client.poll();
 }
 
-
-int audio_buffer[BUFFER_SIZE];
-void fc04_init()
-{
-  pinMode(FC04_PIN, INPUT);
-}
-void fc04_task()
-{
-  // Fill the buffer with sampled audio data
-  // for (int i = 0; i < BUFFER_SIZE; i++)
-  // {
-  //   int reading = analogRead(FC04_PIN); // Read analog values (0–4095 for ESP32)
-  //   Serial.println(reading);
-  //   audio_buffer[i] = reading;
-  //   delayMicroseconds(1000000 / SAMPLE_RATE); // Ensure correct sampling rate
-  // }
-
-  // // Convert the audio buffer to 16-bit PCM
-  // uint8_t pcm_buffer[BUFFER_SIZE * 2]; // 16-bit PCM requires 2 bytes per sample
-  // for (int i = 0; i < BUFFER_SIZE; i++)
-  // {
-  //   int16_t sample = map(audio_buffer[i], 0, 4095, -32768, 32767); // Map 12-bit ADC to 16-bit PCM
-  //   pcm_buffer[i * 2] = sample & 0xFF;        // Lower byte
-  //   pcm_buffer[i * 2 + 1] = (sample >> 8) & 0xFF; // Upper byte
-  // }
-
-  // // Send PCM data over WebSocket
-  // audio_ws_client.sendBinary((const char *)pcm_buffer, sizeof(pcm_buffer));
-  // Serial.println("Audio chunk sent!");
-}
-
 void setup()
 {
   Serial.begin(115200);
@@ -171,7 +134,6 @@ void setup()
   wifi_and_websockets_init();
   dh22_init();
   camera_init();
-  // fc04_init();n=n
 
   unsigned long current_millis = millis();
   static unsigned long last_temp_sent_millis = 0;
